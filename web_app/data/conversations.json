@@ -1,0 +1,80 @@
+[
+    {
+        "id": "conv-1",
+        "participants": [
+            "user-demo",
+            "user-3"
+        ],
+        "participantDetails": [
+            {
+                "id": "user-3",
+                "name": "Simba Mhango",
+                "avatar": "https://randomuser.me/api/portraits/men/65.jpg"
+            }
+        ],
+        "lastMessage": {
+            "id": "msg-105",
+            "conversationId": "conv-1",
+            "senderId": "user-3",
+            "receiverId": "user-demo",
+            "content": "Great! See you on Saturday at 9am then. I'll bring my bakkie.",
+            "read": false,
+            "createdAt": "2024-11-30T15:30:00Z"
+        },
+        "unreadCount": 1,
+        "createdAt": "2024-11-26T10:30:00Z",
+        "updatedAt": "2024-11-30T15:30:00Z"
+    },
+    {
+        "id": "conv-2",
+        "participants": [
+            "user-demo",
+            "user-2"
+        ],
+        "participantDetails": [
+            {
+                "id": "user-2",
+                "name": "Rufaro Ndlovu",
+                "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
+            }
+        ],
+        "lastMessage": {
+            "id": "msg-203",
+            "conversationId": "conv-2",
+            "senderId": "user-demo",
+            "receiverId": "user-2",
+            "content": "Perfect! I'll be home all morning. See you then!",
+            "read": true,
+            "createdAt": "2024-11-29T14:20:00Z"
+        },
+        "unreadCount": 0,
+        "createdAt": "2024-11-28T11:30:00Z",
+        "updatedAt": "2024-11-29T14:20:00Z"
+    },
+    {
+        "id": "conv-3",
+        "participants": [
+            "user-demo",
+            "user-5"
+        ],
+        "participantDetails": [
+            {
+                "id": "user-5",
+                "name": "Tapiwa Nyathi",
+                "avatar": "https://randomuser.me/api/portraits/men/22.jpg"
+            }
+        ],
+        "lastMessage": {
+            "id": "msg-302",
+            "conversationId": "conv-3",
+            "senderId": "user-5",
+            "receiverId": "user-demo",
+            "content": "Hi! I saw your furniture assembly task. I can help with that. When do you need it done?",
+            "read": false,
+            "createdAt": "2024-11-29T18:00:00Z"
+        },
+        "unreadCount": 1,
+        "createdAt": "2024-11-29T17:30:00Z",
+        "updatedAt": "2024-11-29T18:00:00Z"
+    }
+]

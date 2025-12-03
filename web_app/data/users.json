@@ -1,0 +1,205 @@
+[
+    {
+        "id": "user-1",
+        "name": "Tendai Moyo",
+        "email": "tendai.moyo@example.com",
+        "phone": "+263 77 123 4567",
+        "avatar": "/avatars/91.jpg",
+        "bio": "Professional tradesman with 10+ years experience in plumbing and electrical work. Honest, reliable, and quality work guaranteed.",
+        "location": "Avondale, Harare",
+        "isVerified": true,
+        "rating": 4.9,
+        "reviewCount": 127,
+        "tasksCompleted": 145,
+        "memberSince": "2022-01-15",
+        "skills": [
+            "Plumbing",
+            "Electrical Service",
+            "Carpentry",
+            "Building Services"
+        ]
+    },
+    {
+        "id": "user-2",
+        "name": "Rufaro Ndlovu",
+        "email": "rufaro.ndlovu@example.com",
+        "phone": "+263 71 456 7890",
+        "avatar": "/avatars/female16.jpg",
+        "bio": "Experienced painter and decorator. Your home will look brand new! Professional finishes guaranteed.",
+        "location": "Borrowdale, Harare",
+        "isVerified": true,
+        "rating": 5.0,
+        "reviewCount": 89,
+        "tasksCompleted": 92,
+        "memberSince": "2022-06-20",
+        "skills": [
+            "Painting",
+            "Tiling",
+            "Building Services"
+        ]
+    },
+    {
+        "id": "user-3",
+        "name": "Simba Mhango",
+        "email": "simba.mhango@example.com",
+        "phone": "+263 77 234 5678",
+        "avatar": "/avatars/80.jpg",
+        "bio": "Qualified mechanic and fuel pump service specialist. Automotive repairs and maintenance.",
+        "location": "Hillside, Bulawayo",
+        "isVerified": false,
+        "rating": 4.7,
+        "reviewCount": 56,
+        "tasksCompleted": 68,
+        "memberSince": "2023-02-10",
+        "skills": [
+            "Mechanics",
+            "Fuel Pump Service"
+        ]
+    },
+    {
+        "id": "user-4",
+        "name": "Chipo Khumalo",
+        "email": "chipo.khumalo@example.com",
+        "phone": "+263 71 987 6543",
+        "avatar": "/avatars/female62.jpg",
+        "bio": "Landscaping professional with a passion for creating beautiful outdoor spaces. Gardens designed and maintained.",
+        "location": "Mount Pleasant, Harare",
+        "isVerified": true,
+        "rating": 4.8,
+        "reviewCount": 73,
+        "tasksCompleted": 81,
+        "memberSince": "2021-09-05",
+        "skills": [
+            "Landscaping",
+            "Other"
+        ]
+    },
+    {
+        "id": "user-5",
+        "name": "Tapiwa Nyathi",
+        "email": "tapiwa.nyathi@example.com",
+        "phone": "+263 78 321 9876",
+        "avatar": "/avatars/63.jpg",
+        "bio": "Experienced carpenter and joiner. Custom furniture and woodwork. Fast and professional service.",
+        "location": "Greendale, Harare",
+        "isVerified": true,
+        "rating": 4.9,
+        "reviewCount": 112,
+        "tasksCompleted": 134,
+        "memberSince": "2022-03-12",
+        "skills": [
+            "Carpentry",
+            "Building Services",
+            "Tiling"
+        ]
+    },
+    {
+        "id": "user-6",
+        "name": "Nyasha Dube",
+        "email": "nyasha.dube@example.com",
+        "phone": "+263 78 555 7777",
+        "avatar": "/avatars/female89.jpg",
+        "bio": "Professional painter with eye for detail. Interior and exterior work. Color consultation available.",
+        "location": "Mutare",
+        "isVerified": true,
+        "rating": 4.6,
+        "reviewCount": 45,
+        "tasksCompleted": 52,
+        "memberSince": "2023-01-18",
+        "skills": [
+            "Painting",
+            "Building Services"
+        ]
+    },
+    {
+        "id": "user-7",
+        "name": "Farai Chikwanha",
+        "email": "farai.chikwanha@example.com",
+        "phone": "+263 77 888 9999",
+        "avatar": "/avatars/17.jpg",
+        "bio": "Licensed plumber. All plumbing work, big or small. Available for emergencies.",
+        "location": "Highlands, Harare",
+        "isVerified": true,
+        "rating": 5.0,
+        "reviewCount": 98,
+        "tasksCompleted": 102,
+        "memberSince": "2021-11-22",
+        "skills": [
+            "Plumbing",
+            "Building Services"
+        ]
+    },
+    {
+        "id": "user-8",
+        "name": "Munashe Sibanda",
+        "email": "munashe.sibanda@example.com",
+        "phone": "+263 71 222 3333",
+        "avatar": "/avatars/female92.jpg",
+        "bio": "Certified electrician and solar installation expert. Safe, compliant electrical work. Certificates provided.",
+        "location": "Gweru",
+        "isVerified": true,
+        "rating": 4.9,
+        "reviewCount": 67,
+        "tasksCompleted": 71,
+        "memberSince": "2022-08-09",
+        "skills": [
+            "Electrical Service",
+            "Solar Installations",
+            "Electrical Engineering"
+        ]
+    },
+    {
+        "id": "user-9",
+        "name": "Anesu Mapfumo",
+        "email": "anesu.mapfumo@example.com",
+        "phone": "+263 77 444 8888",
+        "avatar": "/avatars/54.jpg",
+        "bio": "Civil engineer and project manager. Professional construction and engineering services.",
+        "location": "Bulawayo CBD",
+        "isVerified": false,
+        "rating": 4.7,
+        "reviewCount": 34,
+        "tasksCompleted": 38,
+        "memberSince": "2023-04-15",
+        "skills": [
+            "Architecture",
+            "Project Management Services",
+            "Civil and Structural Engineering"
+        ]
+    },
+    {
+        "id": "user-10",
+        "name": "Rudo Chihota",
+        "email": "rudo.chihota@example.com",
+        "phone": "+263 78 666 7777",
+        "avatar": "/avatars/53.jpg",
+        "bio": "Quantity surveyor and land surveyor. Accurate measurements and professional reports.",
+        "location": "Chitungwiza",
+        "isVerified": true,
+        "rating": 5.0,
+        "reviewCount": 78,
+        "tasksCompleted": 84,
+        "memberSince": "2022-05-20",
+        "skills": [
+            "Quantity Surveying",
+            "Land Surveying"
+        ]
+    },
+    {
+        "id": "user-demo",
+        "name": "Tapfuma Chinake",
+        "email": "demo@airmassxpress.com",
+        "phone": "+263 77 000 0000",
+        "avatar": "/avatars/63.jpg",
+        "bio": "This is a demo account for testing the platform.",
+        "location": "Avondale, Harare",
+        "isVerified": true,
+        "rating": 4.8,
+        "reviewCount": 25,
+        "tasksCompleted": 30,
+        "memberSince": "2024-01-01",
+        "skills": [
+            "Other"
+        ]
+    }
+]

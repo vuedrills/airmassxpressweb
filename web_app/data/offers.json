@@ -1,0 +1,149 @@
+[
+    {
+        "id": "offer-1",
+        "taskId": "task-1",
+        "taskerId": "user-2",
+        "tasker": {
+            "id": "user-2",
+            "name": "Rufaro Ndlovu",
+            "avatar": "https://randomuser.me/api/portraits/women/44.jpg",
+            "rating": 5.0,
+            "reviewCount": 89,
+            "isVerified": true,
+            "tasksCompleted": 92
+        },
+        "amount": 75,
+        "description": "Hi! I'm Rufaro and I specialize in deep cleaning. I have all my own eco-friendly products and equipment. I can start anytime this week. Your home will sparkle!",
+        "status": "pending",
+        "estimatedDuration": "4-5 hours",
+        "availability": "Available this week",
+        "createdAt": "2024-11-28T11:00:00Z",
+        "updatedAt": "2024-11-28T11:00:00Z"
+    },
+    {
+        "id": "offer-2",
+        "taskId": "task-2",
+        "taskerId": "user-7",
+        "tasker": {
+            "id": "user-7",
+            "name": "Farai Chikwanha",
+            "avatar": "https://randomuser.me/api/portraits/men/45.jpg",
+            "rating": 5.0,
+            "reviewCount": 98,
+            "isVerified": true,
+            "tasksCompleted": 102
+        },
+        "amount": 30,
+        "description": "Licensed plumber here. I can fix that tap quickly - usually takes 30-45 minutes. I have all washers and parts in my van. Can come today if needed!",
+        "status": "pending",
+        "estimatedDuration": "30-45 minutes",
+        "availability": "Available today",
+        "createdAt": "2024-11-27T15:30:00Z",
+        "updatedAt": "2024-11-27T15:30:00Z"
+    },
+    {
+        "id": "offer-3",
+        "taskId": "task-3",
+        "taskerId": "user-3",
+        "tasker": {
+            "id": "user-3",
+            "name": "Simba Mhango",
+            "avatar": "https://randomuser.me/api/portraits/men/65.jpg",
+            "rating": 4.7,
+            "reviewCount": 56,
+            "isVerified": false,
+            "tasksCompleted": 68
+        },
+        "amount": 45,
+        "description": "I have a bakkie and can easily move your couch. I'll bring blankets to protect it. Have done many furniture moves - careful and professional!",
+        "status": "accepted",
+        "estimatedDuration": "2 hours",
+        "availability": "Available December 3rd morning",
+        "createdAt": "2024-11-26T10:00:00Z",
+        "updatedAt": "2024-11-26T12:30:00Z"
+    },
+    {
+        "id": "offer-4",
+        "taskId": "task-4",
+        "taskerId": "user-5",
+        "tasker": {
+            "id": "user-5",
+            "name": "Tapiwa Nyathi",
+            "avatar": "https://randomuser.me/api/portraits/men/22.jpg",
+            "rating": 4.9,
+            "reviewCount": 112,
+            "isVerified": true,
+            "tasksCompleted": 134
+        },
+        "amount": 55,
+        "description": "IKEA PAX expert here! I've built hundreds of these. I bring all my own tools and work clean. Will have it done in 3 hours max. Available any day this week.",
+        "status": "pending",
+        "estimatedDuration": "3 hours",
+        "availability": "Flexible this week",
+        "createdAt": "2024-11-29T17:15:00Z",
+        "updatedAt": "2024-11-29T17:15:00Z"
+    },
+    {
+        "id": "offer-5",
+        "taskId": "task-5",
+        "taskerId": "user-4",
+        "tasker": {
+            "id": "user-4",
+            "name": "Chipo Khumalo",
+            "avatar": "https://randomuser.me/api/portraits/women/68.jpg",
+            "rating": 4.8,
+            "reviewCount": 73,
+            "isVerified": true,
+            "tasksCompleted": 81
+        },
+        "amount": 38,
+        "description": "Professional gardener with own equipment. I can mow the lawn and trim the hedges neatly. Will also edge and rake up all clippings. Available Dec 2nd!",
+        "status": "pending",
+        "estimatedDuration": "2-3 hours",
+        "availability": "December 2nd morning",
+        "createdAt": "2024-11-28T12:00:00Z",
+        "updatedAt": "2024-11-28T12:00:00Z"
+    },
+    {
+        "id": "offer-6",
+        "taskId": "task-8",
+        "taskerId": "user-9",
+        "tasker": {
+            "id": "user-9",
+            "name": "Anesu Mapfumo",
+            "avatar": "https://randomuser.me/api/portraits/men/54.jpg",
+            "rating": 4.7,
+            "reviewCount": 34,
+            "isVerified": false,
+            "tasksCompleted": 38
+        },
+        "amount": 230,
+        "description": "Professional photographer with 5+ years experience in events. I'll capture all the special moments! Includes 3 hours coverage, 100+ edited photos delivered within 5 days. Have shot many kids' parties before!",
+        "status": "pending",
+        "estimatedDuration": "3 hours + editing",
+        "availability": "Available December 7th afternoon",
+        "createdAt": "2024-11-24T16:00:00Z",
+        "updatedAt": "2024-11-24T16:00:00Z"
+    },
+    {
+        "id": "offer-7",
+        "taskId": "task-9",
+        "taskerId": "user-10",
+        "tasker": {
+            "id": "user-10",
+            "name": "Rudo Chihota",
+            "avatar": "https://randomuser.me/api/portraits/women/22.jpg",
+            "rating": 5.0,
+            "reviewCount": 78,
+            "isVerified": true,
+            "tasksCompleted": 84
+        },
+        "amount": 140,
+        "description": "I'm a huge dog lover and would be happy to walk your dogs! I walk dogs in your area already. Very reliable and punctual. Dogs always get 1 hour walks with lots of play time!",
+        "status": "pending",
+        "estimatedDuration": "1 hour daily",
+        "availability": "Mondays to Fridays 7am",
+        "createdAt": "2024-11-29T13:00:00Z",
+        "updatedAt": "2024-11-29T13:00:00Z"
+    }
+]

@@ -1,0 +1,47 @@
+[
+    {
+        "id": "question-1",
+        "taskId": "task-1",
+        "userId": "user-5",
+        "userName": "Tapiwa Nyathi",
+        "userAvatar": "/avatars/63.jpg",
+        "message": "Is the pipe completely burst or just leaking? Do you have the water shut off?",
+        "createdAt": "2024-11-28T11:00:00Z"
+    },
+    {
+        "id": "question-2",
+        "taskId": "task-1",
+        "userId": "user-7",
+        "userName": "Farai Chikwanha",
+        "userAvatar": "/avatars/17.jpg",
+        "message": "What type of pipes are in your house? Copper or PVC?",
+        "createdAt": "2024-11-28T12:30:00Z"
+    },
+    {
+        "id": "question-3",
+        "taskId": "task-2",
+        "userId": "user-1",
+        "userName": "Tendai Moyo",
+        "userAvatar": "/avatars/91.jpg",
+        "message": "Hi! What size are the tiles? And is the substrate already waterproofed?",
+        "createdAt": "2024-11-27T15:00:00Z"
+    },
+    {
+        "id": "question-4",
+        "taskId": "task-3",
+        "userId": "user-8",
+        "userName": "Munashe Sibanda",
+        "userAvatar": "/avatars/female92.jpg",
+        "message": "Do you have the electrical plans already or do I need to design them as well?",
+        "createdAt": "2024-11-26T10:00:00Z"
+    },
+    {
+        "id": "question-5",
+        "taskId": "task-5",
+        "userId": "user-2",
+        "userName": "Rufaro Ndlovu",
+        "userAvatar": "/avatars/female16.jpg",
+        "message": "What type of wood would you like? I can provide samples.",
+        "createdAt": "2024-11-28T13:00:00Z"
+    }
+]

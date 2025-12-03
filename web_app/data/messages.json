@@ -1,0 +1,92 @@
+[
+    {
+        "id": "msg-101",
+        "conversationId": "conv-1",
+        "senderId": "user-demo",
+        "receiverId": "user-3",
+        "content": "Hi Michael! I saw your offer for moving my couch. Are you available this Saturday?",
+        "read": true,
+        "createdAt": "2024-11-26T11:00:00Z"
+    },
+    {
+        "id": "msg-102",
+        "conversationId": "conv-1",
+        "senderId": "user-3",
+        "receiverId": "user-demo",
+        "content": "Hi! Yes, I'm available on Saturday. What time works for you?",
+        "read": true,
+        "createdAt": "2024-11-26T11:15:00Z"
+    },
+    {
+        "id": "msg-103",
+        "conversationId": "conv-1",
+        "senderId": "user-demo",
+        "receiverId": "user-3",
+        "content": "Morning would be great, around 9am if that works?",
+        "read": true,
+        "createdAt": "2024-11-26T11:30:00Z"
+    },
+    {
+        "id": "msg-104",
+        "conversationId": "conv-1",
+        "senderId": "user-3",
+        "receiverId": "user-demo",
+        "content": "Perfect! 9am works. I'll bring protective blankets for the couch.",
+        "read": true,
+        "createdAt": "2024-11-28T09:00:00Z"
+    },
+    {
+        "id": "msg-105",
+        "conversationId": "conv-1",
+        "senderId": "user-3",
+        "receiverId": "user-demo",
+        "content": "Great! See you on Saturday at 9am then. I'll bring my bakkie.",
+        "read": false,
+        "createdAt": "2024-11-30T15:30:00Z"
+    },
+    {
+        "id": "msg-201",
+        "conversationId": "conv-2",
+        "senderId": "user-2",
+        "receiverId": "user-demo",
+        "content": "Hi! I can do the deep cleaning for R750. I have all eco-friendly products. When would you like me to come?",
+        "read": true,
+        "createdAt": "2024-11-28T11:30:00Z"
+    },
+    {
+        "id": "msg-202",
+        "conversationId": "conv-2",
+        "senderId": "user-demo",
+        "receiverId": "user-2",
+        "content": "That sounds great! How about this Thursday morning?",
+        "read": true,
+        "createdAt": "2024-11-29T10:00:00Z"
+    },
+    {
+        "id": "msg-203",
+        "conversationId": "conv-2",
+        "senderId": "user-demo",
+        "receiverId": "user-2",
+        "content": "Perfect! I'll be home all morning. See you then!",
+        "read": true,
+        "createdAt": "2024-11-29T14:20:00Z"
+    },
+    {
+        "id": "msg-301",
+        "conversationId": "conv-3",
+        "senderId": "user-5",
+        "receiverId": "user-demo",
+        "content": "Hi! I saw your furniture assembly task. I can help with that. When do you need it done?",
+        "read": false,
+        "createdAt": "2024-11-29T18:00:00Z"
+    },
+    {
+        "id": "msg-302",
+        "conversationId": "conv-3",
+        "senderId": "user-5",
+        "receiverId": "user-demo",
+        "content": "I'm available most days this week and can bring all my own tools.",
+        "read": false,
+        "createdAt": "2024-11-29T18:00:00Z"
+    }
+]

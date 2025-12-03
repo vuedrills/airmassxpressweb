@@ -1,0 +1,142 @@
+[
+  {
+    "id": "cat-1",
+    "name": "Plumbing",
+    "slug": "plumbing",
+    "icon": "💧",
+    "taskCount": 142
+  },
+  {
+    "id": "cat-2",
+    "name": "Tiling",
+    "slug": "tiling",
+    "icon": "🔲",
+    "taskCount": 89
+  },
+  {
+    "id": "cat-3",
+    "name": "Electrical Service",
+    "slug": "electrical-service",
+    "icon": "⚡",
+    "taskCount": 167
+  },
+  {
+    "id": "cat-4",
+    "name": "Building Services",
+    "slug": "building-services",
+    "icon": "🏗️",
+    "taskCount": 203
+  },
+  {
+    "id": "cat-5",
+    "name": "Carpentry",
+    "slug": "carpentry",
+    "icon": "🪚",
+    "taskCount": 128
+  },
+  {
+    "id": "cat-6",
+    "name": "Painting",
+    "slug": "painting",
+    "icon": "🎨",
+    "taskCount": 156
+  },
+  {
+    "id": "cat-7",
+    "name": "Solar Installations",
+    "slug": "solar-installations",
+    "icon": "☀️",
+    "taskCount": 94
+  },
+  {
+    "id": "cat-8",
+    "name": "Landscaping",
+    "slug": "landscaping",
+    "icon": "🌿",
+    "taskCount": 112
+  },
+  {
+    "id": "cat-9",
+    "name": "Fuel Pump Service",
+    "slug": "fuel-pump-service",
+    "icon": "⛽",
+    "taskCount": 45
+  },
+  {
+    "id": "cat-10",
+    "name": "Mechanics",
+    "slug": "mechanics",
+    "icon": "🔧",
+    "taskCount": 178
+  },
+  {
+    "id": "cat-11",
+    "name": "Architecture",
+    "slug": "architecture",
+    "icon": "📐",
+    "taskCount": 67
+  },
+  {
+    "id": "cat-12",
+    "name": "Project Management Services",
+    "slug": "project-management",
+    "icon": "📊",
+    "taskCount": 82
+  },
+  {
+    "id": "cat-13",
+    "name": "Civil and Structural Engineering",
+    "slug": "civil-structural-engineering",
+    "icon": "🏛️",
+    "taskCount": 73
+  },
+  {
+    "id": "cat-14",
+    "name": "Electrical Engineering",
+    "slug": "electrical-engineering",
+    "icon": "⚙️",
+    "taskCount": 91
+  },
+  {
+    "id": "cat-15",
+    "name": "Mechanical Engineering",
+    "slug": "mechanical-engineering",
+    "icon": "🛠️",
+    "taskCount": 86
+  },
+  {
+    "id": "cat-16",
+    "name": "Quantity Surveying",
+    "slug": "quantity-surveying",
+    "icon": "📏",
+    "taskCount": 54
+  },
+  {
+    "id": "cat-17",
+    "name": "Land Surveying",
+    "slug": "land-surveying",
+    "icon": "🗺️",
+    "taskCount": 48
+  },
+  {
+    "id": "cat-18",
+    "name": "Geotechnical Engineering",
+    "slug": "geotechnical-engineering",
+    "icon": "🌍",
+    "taskCount": 39
+  },
+  {
+    "id": "cat-19",
+    "name": "Solar Engineering",
+    "slug": "solar-engineering",
+    "icon": "🔆",
+    "taskCount": 61
+  },
+  {
+    "id": "cat-20",
+    "name": "Other",
+    "slug": "other",
+    "icon": "📋",
+    "taskCount": 234
+  }
+]
