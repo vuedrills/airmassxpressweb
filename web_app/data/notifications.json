@@ -1,0 +1,111 @@
+[
+    {
+        "id": "notif-1",
+        "userId": "user-demo",
+        "type": "offer_accepted",
+        "title": "Offer Accepted!",
+        "message": "Your offer for 'Repair burst water pipe in kitchen' has been accepted.",
+        "taskId": "task-1",
+        "offerId": "offer-1-1",
+        "read": false,
+        "createdAt": "2024-12-04T09:30:00Z",
+        "actionUrl": "/task-workspace/task-1"
+    },
+    {
+        "id": "notif-2",
+        "userId": "user-1",
+        "type": "task_started",
+        "title": "Task Started",
+        "message": "Work has begun on your task 'Repair burst water pipe in kitchen'.",
+        "taskId": "task-1",
+        "read": true,
+        "createdAt": "2024-12-04T09:30:00Z",
+        "actionUrl": "/task-workspace/task-1"
+    },
+    {
+        "id": "notif-3",
+        "userId": "user-demo",
+        "type": "progress_update",
+        "title": "Progress Update",
+        "message": "Task progress updated to 50% for 'Repair burst water pipe in kitchen'.",
+        "taskId": "task-1",
+        "read": false,
+        "createdAt": "2024-12-04T10:15:00Z",
+        "actionUrl": "/task-workspace/task-1"
+    },
+    {
+        "id": "notif-4",
+        "userId": "user-1",
+        "type": "task_completed",
+        "title": "Task Marked Complete",
+        "message": "The tasker has marked 'Repair burst water pipe in kitchen' as complete. Please review and release payment.",
+        "taskId": "task-1",
+        "read": false,
+        "createdAt": "2024-12-04T11:00:00Z",
+        "actionUrl": "/task-workspace/task-1"
+    },
+    {
+        "id": "notif-5",
+        "userId": "user-2",
+        "type": "payment_released",
+        "title": "Payment Released",
+        "message": "Payment of $75 has been released for 'Deep clean my 3-bedroom house'.",
+        "taskId": "task-1",
+        "read": true,
+        "createdAt": "2024-12-03T14:00:00Z"
+    },
+    {
+        "id": "notif-6",
+        "userId": "user-2",
+        "type": "review_received",
+        "title": "New Review",
+        "message": "You received a 5-star review from Tendai Moyo.",
+        "taskId": "task-1",
+        "read": false,
+        "createdAt": "2024-12-03T14:30:00Z",
+        "actionUrl": "/profile/user-2/reviews"
+    },
+    {
+        "id": "notif-7",
+        "userId": "user-3",
+        "type": "revision_requested",
+        "title": "Revisions Requested",
+        "message": "The task poster has requested revisions on 'Install bathroom tiles - 15sqm'.",
+        "taskId": "task-2",
+        "read": false,
+        "createdAt": "2024-12-03T16:00:00Z",
+        "actionUrl": "/task-workspace/task-2"
+    },
+    {
+        "id": "notif-8",
+        "userId": "user-4",
+        "type": "dispute_raised",
+        "title": "Dispute Raised",
+        "message": "A dispute has been raised for task 'Custom kitchen cabinets'. Our team will review.",
+        "taskId": "task-5",
+        "read": false,
+        "createdAt": "2024-12-02T11:00:00Z",
+        "actionUrl": "/disputes/dispute-1"
+    },
+    {
+        "id": "notif-9",
+        "userId": "user-5",
+        "type": "offer_declined",
+        "title": "Offer Not Selected",
+        "message": "Your offer for 'Paint exterior of house - 3 bedroom' was not selected.",
+        "taskId": "task-6",
+        "offerId": "offer-6-2",
+        "read": true,
+        "createdAt": "2024-12-01T10:00:00Z"
+    },
+    {
+        "id": "notif-10",
+        "userId": "user-7",
+        "type": "task_cancelled",
+        "title": "Task Cancelled",
+        "message": "The task 'Garden makeover and new lawn' has been cancelled by the poster.",
+        "taskId": "task-8",
+        "read": false,
+        "createdAt": "2024-11-30T15:00:00Z"
+    }
+]

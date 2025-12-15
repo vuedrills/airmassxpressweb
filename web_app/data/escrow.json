@@ -1,0 +1,97 @@
+[
+    {
+        "id": "escrow-1",
+        "taskId": "task-1",
+        "offerId": "offer-1-1",
+        "amount": 100,
+        "status": "held",
+        "paymentGateway": "PLACEHOLDER_PAYNOW",
+        "gatewayTransactionId": null,
+        "heldAt": "2024-12-04T09:30:00Z",
+        "releaseScheduledFor": "2024-12-11T09:30:00Z",
+        "notes": "Payment held in escrow pending task completion"
+    },
+    {
+        "id": "escrow-2",
+        "taskId": "task-2",
+        "offerId": "offer-2-1",
+        "amount": 180,
+        "status": "held",
+        "paymentGateway": "PLACEHOLDER_PESAPAL",
+        "gatewayTransactionId": null,
+        "heldAt": "2024-12-02T10:00:00Z",
+        "releaseScheduledFor": "2024-12-09T10:00:00Z",
+        "notes": "Payment held in escrow pending task completion"
+    },
+    {
+        "id": "escrow-3",
+        "taskId": "task-3",
+        "offerId": "offer-3-1",
+        "amount": 45,
+        "status": "released",
+        "paymentGateway": "PLACEHOLDER_PAYNOW",
+        "gatewayTransactionId": "PAYNOW_TXN_12345",
+        "heldAt": "2024-11-26T12:30:00Z",
+        "releasedAt": "2024-12-04T10:00:00Z",
+        "notes": "Payment successfully released to tasker"
+    },
+    {
+        "id": "escrow-4",
+        "taskId": "task-4",
+        "offerId": "offer-4-1",
+        "amount": 55,
+        "status": "released",
+        "paymentGateway": "PLACEHOLDER_PESAPAL",
+        "gatewayTransactionId": "PESAPAL_TXN_67890",
+        "heldAt": "2024-11-30T10:00:00Z",
+        "releasedAt": "2024-12-02T20:00:00Z",
+        "notes": "Payment successfully released to tasker"
+    },
+    {
+        "id": "escrow-5",
+        "taskId": "task-5",
+        "offerId": "offer-5-1",
+        "amount": 38,
+        "status": "released",
+        "paymentGateway": "PLACEHOLDER_PAYNOW",
+        "gatewayTransactionId": "PAYNOW_TXN_11111",
+        "heldAt": "2024-12-01T08:00:00Z",
+        "releasedAt": "2024-12-03T11:00:00Z",
+        "notes": "Payment successfully released to tasker"
+    },
+    {
+        "id": "escrow-6",
+        "taskId": "task-6",
+        "offerId": "offer-6-1",
+        "amount": 320,
+        "status": "disputed",
+        "paymentGateway": "PLACEHOLDER_PAYNOW",
+        "gatewayTransactionId": null,
+        "heldAt": "2024-12-05T10:00:00Z",
+        "notes": "Payment on hold due to active dispute"
+    },
+    {
+        "id": "escrow-7",
+        "taskId": "task-8",
+        "offerId": "offer-8-1",
+        "amount": 230,
+        "status": "refunded",
+        "paymentGateway": "PLACEHOLDER_PESAPAL",
+        "gatewayTransactionId": "PESAPAL_REFUND_22222",
+        "heldAt": "2024-11-25T14:00:00Z",
+        "refundedAt": "2024-11-30T15:00:00Z",
+        "notes": "Task cancelled by poster - full refund issued"
+    },
+    {
+        "id": "escrow-8",
+        "taskId": "task-9",
+        "offerId": "offer-9-1",
+        "amount": 140,
+        "status": "released",
+        "paymentGateway": "PLACEHOLDER_PAYNOW",
+        "gatewayTransactionId": "PAYNOW_TXN_33333",
+        "heldAt": "2024-11-28T08:00:00Z",
+        "releasedAt": "2024-12-01T19:00:00Z",
+        "notes": "Payment successfully released to tasker"
+    }
+]

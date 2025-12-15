@@ -21,4 +21,8 @@ export interface Offer {
     availability?: string;
     createdAt: string;
     updatedAt: string;
+    // New fields for workflow
+    acceptedAt?: string;
+    declinedAt?: string;
+    withdrawnAt?: string;
 }

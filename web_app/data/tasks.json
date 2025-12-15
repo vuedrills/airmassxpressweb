@@ -17,10 +17,10 @@
             "reviewCount": 25,
             "isVerified": true
         },
-        "offerCount": 5,
+        "offerCount": 3,
         "images": [
-            "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=400&h=300&fit=crop"
+            "/tasks/task1-1.jpg",
+            "/tasks/task1-2.jpg"
         ],
         "createdAt": "2024-11-28T10:30:00Z",
         "updatedAt": "2024-11-28T10:30:00Z"
@@ -44,7 +44,11 @@
             "reviewCount": 56,
             "isVerified": false
         },
-        "offerCount": 8,
+        "offerCount": 2,
+        "images": [
+            "/tasks/task2-1.jpg",
+            "/tasks/task2-2.jpg"
+        ],
         "createdAt": "2024-11-27T14:20:00Z",
         "updatedAt": "2024-11-27T14:20:00Z"
     },
@@ -68,7 +72,7 @@
             "reviewCount": 127,
             "isVerified": true
         },
-        "offerCount": 12,
+        "offerCount": 3,
         "createdAt": "2024-11-26T09:15:00Z",
         "updatedAt": "2024-11-26T09:15:00Z"
     },
@@ -90,7 +94,11 @@
             "reviewCount": 89,
             "isVerified": true
         },
-        "offerCount": 7,
+        "offerCount": 2,
+        "images": [
+            "/tasks/task4-1.jpg",
+            "/tasks/task4-2.jpg"
+        ],
         "createdAt": "2024-11-29T16:45:00Z",
         "updatedAt": "2024-11-29T16:45:00Z"
     },
@@ -114,7 +122,11 @@
             "reviewCount": 73,
             "isVerified": true
         },
-        "offerCount": 4,
+        "offerCount": 3,
+        "images": [
+            "/tasks/task5-1.jpg",
+            "/tasks/task5-2.jpg"
+        ],
         "createdAt": "2024-11-28T11:30:00Z",
         "updatedAt": "2024-11-28T11:30:00Z"
     },
@@ -137,7 +149,7 @@
             "reviewCount": 112,
             "isVerified": true
         },
-        "offerCount": 9,
+        "offerCount": 2,
         "createdAt": "2024-11-25T13:00:00Z",
         "updatedAt": "2024-11-25T13:00:00Z"
     },
@@ -159,7 +171,7 @@
             "reviewCount": 45,
             "isVerified": true
         },
-        "offerCount": 6,
+        "offerCount": 3,
         "createdAt": "2024-11-30T08:20:00Z",
         "updatedAt": "2024-11-30T08:20:00Z"
     },
@@ -183,7 +195,7 @@
             "reviewCount": 98,
             "isVerified": true
         },
-        "offerCount": 11,
+        "offerCount": 2,
         "createdAt": "2024-11-24T15:30:00Z",
         "updatedAt": "2024-11-24T15:30:00Z"
     },
@@ -205,7 +217,7 @@
             "reviewCount": 67,
             "isVerified": true
         },
-        "offerCount": 15,
+        "offerCount": 3,
         "createdAt": "2024-11-29T12:00:00Z",
         "updatedAt": "2024-11-29T12:00:00Z"
     },
@@ -229,7 +241,7 @@
             "reviewCount": 34,
             "isVerified": false
         },
-        "offerCount": 3,
+        "offerCount": 2,
         "createdAt": "2024-11-30T10:15:00Z",
         "updatedAt": "2024-11-30T10:15:00Z"
     },
@@ -252,7 +264,7 @@
             "reviewCount": 78,
             "isVerified": true
         },
-        "offerCount": 5,
+        "offerCount": 3,
         "createdAt": "2024-11-27T17:30:00Z",
         "updatedAt": "2024-11-27T17:30:00Z"
     },
@@ -274,7 +286,7 @@
             "reviewCount": 127,
             "isVerified": true
         },
-        "offerCount": 8,
+        "offerCount": 2,
         "createdAt": "2024-11-26T14:00:00Z",
         "updatedAt": "2024-11-26T14:00:00Z"
     },
@@ -298,7 +310,7 @@
             "reviewCount": 89,
             "isVerified": true
         },
-        "offerCount": 7,
+        "offerCount": 3,
         "createdAt": "2024-11-28T09:00:00Z",
         "updatedAt": "2024-11-28T09:00:00Z"
     },
@@ -321,7 +333,7 @@
             "reviewCount": 56,
             "isVerified": false
         },
-        "offerCount": 4,
+        "offerCount": 2,
         "createdAt": "2024-11-29T11:00:00Z",
         "updatedAt": "2024-11-29T11:00:00Z"
     },
@@ -343,7 +355,7 @@
             "reviewCount": 73,
             "isVerified": true
         },
-        "offerCount": 6,
+        "offerCount": 3,
         "createdAt": "2024-11-25T16:00:00Z",
         "updatedAt": "2024-11-25T16:00:00Z"
     }

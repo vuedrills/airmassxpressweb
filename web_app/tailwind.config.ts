@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-    darkMode: ["class"],
+    darkMode: "class",
     content: [
         "./pages/**/*.{js,ts,jsx,tsx,mdx}",
         "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -75,6 +75,7 @@ const config: Config = {
             fontFamily: {
                 sans: ["var(--font-nunito)", "sans-serif"],
                 heading: ["var(--font-fjalla)", "sans-serif"],
+                "roboto-condensed": ["var(--font-roboto-condensed)", "sans-serif"],
             },
         },
     },

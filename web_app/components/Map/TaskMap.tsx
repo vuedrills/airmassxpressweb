@@ -7,16 +7,18 @@ import { Task } from '@/types';
 interface TaskMapProps {
     tasks: Task[];
     onTaskSelect: (taskId: string) => void;
+    focusedTaskId?: string | null;
 }
 
 // Zimbabwe coordinates (Harare center)
 const ZIMBABWE_CENTER: [number, number] = [31.0335, -17.8252]; // lng, lat for MapLibre
 
-export default function TaskMap({ tasks, onTaskSelect }: TaskMapProps) {
+export default function TaskMap({ tasks, onTaskSelect, focusedTaskId }: TaskMapProps) {
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<maplibregl.Map | null>(null);
     const [mapLoaded, setMapLoaded] = useState(false);
     const markersRef = useRef<maplibregl.Marker[]>([]);
+    const activePopupRef = useRef<maplibregl.Popup | null>(null);
 
     useEffect(() => {
         if (!mapContainer.current) return;
@@ -46,6 +48,54 @@ export default function TaskMap({ tasks, onTaskSelect }: TaskMapProps) {
         };
     }, []);
 
+    // Effect to handle focusing on a specific task
+    useEffect(() => {
+        if (!map.current || !mapLoaded || !focusedTaskId) return;
+
+        const taskToFocus = tasks.find(t => t.id === focusedTaskId);
+        if (taskToFocus) {
+            const performFlyTo = (lng: number, lat: number) => {
+                if (!map.current) return;
+
+                map.current.flyTo({
+                    center: [lng, lat],
+                    zoom: 15,
+                    essential: true
+                });
+
+                // Find and open popup
+                // We need a slight delay to ensure markers are created if this is the first load
+                setTimeout(() => {
+                    const marker = markersRef.current.find(m => (m as any)._taskId === focusedTaskId);
+                    if (marker) {
+                        // Close existing popup
+                        if (activePopupRef.current) {
+                            activePopupRef.current.remove();
+                        }
+
+                        marker.togglePopup();
+                        activePopupRef.current = marker.getPopup();
+                    }
+                }, 500);
+            };
+
+            if (taskToFocus.lat && taskToFocus.lng) {
+                performFlyTo(taskToFocus.lng, taskToFocus.lat);
+            } else if (taskToFocus.location) {
+                // Geocode on the fly
+                import('use-places-autocomplete').then(async ({ getGeocode, getLatLng }) => {
+                    try {
+                        const results = await getGeocode({ address: taskToFocus.location });
+                        const { lat, lng } = await getLatLng(results[0]);
+                        performFlyTo(lng, lat);
+                    } catch (error) {
+                        console.error("Failed to geocode for flyTo:", error);
+                    }
+                });
+            }
+        }
+    }, [focusedTaskId, mapLoaded, tasks]);
+
     useEffect(() => {
         if (!map.current || !mapLoaded) return;
 
@@ -53,17 +103,9 @@ export default function TaskMap({ tasks, onTaskSelect }: TaskMapProps) {
         markersRef.current.forEach(m => m.remove());
         markersRef.current = [];
 
-        // Add markers for tasks
-        tasks.forEach((task) => {
+        // Helper to add a marker
+        const addMarker = (task: Task, lng: number, lat: number) => {
             if (!map.current) return;
-
-            // Generate random coordinates around Harare
-            const latOffset = (Math.random() - 0.5) * 0.1;
-            const lngOffset = (Math.random() - 0.5) * 0.1;
-            const coordinates: [number, number] = [
-                ZIMBABWE_CENTER[0] + lngOffset,
-                ZIMBABWE_CENTER[1] + latOffset,
-            ];
 
             // Create custom marker element
             const el = document.createElement('div');
@@ -106,18 +148,56 @@ export default function TaskMap({ tasks, onTaskSelect }: TaskMapProps) {
 
             // Add marker
             const marker = new maplibregl.Marker({ element: el })
-                .setLngLat(coordinates)
+                .setLngLat([lng, lat])
                 .setPopup(popup)
-                .addTo(map.current);
+                .addTo(map.current!); // Non-null assertion safe because of check at start of function
+
+            // Store task ID on marker for reference
+            (marker as any)._taskId = task.id;
 
             // Store marker reference
             markersRef.current.push(marker);
 
-            // Show popup on marker click
+            // Show popup on marker click and close others
             el.addEventListener('click', (e) => {
                 e.stopPropagation();
+
+                // Close currently active popup if it's different
+                if (activePopupRef.current && activePopupRef.current !== popup) {
+                    activePopupRef.current.remove();
+                }
+
                 marker.togglePopup();
+                activePopupRef.current = popup;
             });
+
+            // Also update active popup ref when popup is closed via X button
+            popup.on('close', () => {
+                if (activePopupRef.current === popup) {
+                    activePopupRef.current = null;
+                }
+            });
+        };
+
+        // Process tasks
+        tasks.forEach(async (task) => {
+            if (task.lat && task.lng) {
+                // If we have coordinates, use them
+                addMarker(task, task.lng, task.lat);
+            } else if (task.location) {
+                // If no coordinates but we have a location string, try to geocode it
+                try {
+                    // We need to dynamically import these to avoid SSR issues and ensure Google Maps is loaded
+                    const { getGeocode, getLatLng } = await import('use-places-autocomplete');
+                    const results = await getGeocode({ address: task.location });
+                    const { lat, lng } = await getLatLng(results[0]);
+                    addMarker(task, lng, lat);
+                } catch (error) {
+                    console.warn(`Failed to geocode location for task ${task.id} (${task.location}):`, error);
+                    // If geocoding fails, we simply don't show the marker.
+                    // This is better than showing it in the wrong place (Harare).
+                }
+            }
         });
     }, [tasks, mapLoaded, onTaskSelect]);
 

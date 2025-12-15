@@ -1,5 +1,5 @@
 // Task types
-export type TaskStatus = 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
+export type TaskStatus = 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled' | 'revision_requested' | 'dispute';
 export type DateType = 'on_date' | 'before_date' | 'flexible';
 export type TimeOfDay = 'morning' | 'midday' | 'afternoon' | 'evening';
 
@@ -10,23 +10,43 @@ export interface Task {
     category: string;
     budget: number;
     location: string;
+    lat?: number;
+    lng?: number;
     dateType: DateType;
     date?: string;
     timeOfDay?: TimeOfDay;
     status: TaskStatus;
+    taskType?: 'service' | 'equipment';
     posterId: string;
     poster?: {
         id: string;
         name: string;
         avatar?: string;
+        avatar_url?: string;
         rating: number;
         reviewCount: number;
         isVerified: boolean;
     };
     offerCount: number;
-    images?: string[];
+    attachments?: { id: string; url: string; type: 'image' | 'document'; name: string }[];
+    images?: string[]; // Kept for backward compatibility
     createdAt: string;
     updatedAt: string;
+    // New fields for workflow
+    acceptedOfferId?: string;
+    progress?: number; // 0-100
+    cancelledBy?: 'poster' | 'tasker';
+    cancellationReason?: string;
+    revisionMessage?: string;
+    completedAt?: string;
+    // Relations
+    conversationId?: string;
+    acceptedOffer?: {
+        id: string;
+        taskerId: string;
+        amount: number;
+        conversationId?: string;
+    };
 }
 
 export interface Category {

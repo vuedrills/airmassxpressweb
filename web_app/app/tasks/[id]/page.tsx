@@ -68,7 +68,7 @@ export default function TaskDetailPage() {
             <Header />
 
             <main className="flex-1 bg-gray-50 py-8">
-                <div className="container mx-auto px-4">
+                <div className="container max-w-6xl mx-auto px-4">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-6">
@@ -84,16 +84,24 @@ export default function TaskDetailPage() {
                                 <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                                     <div className="flex items-center gap-2">
                                         <MapPin className="h-4 w-4" />
-                                        <span>{task.location}</span>
+                                        <a
+                                            href={`https://www.google.com/maps/search/?api=1&query=${task.lat && task.lng ? `${task.lat},${task.lng}` : encodeURIComponent(task.location)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="hover:text-primary hover:underline"
+                                        >
+                                            {task.location} (View on map)
+                                        </a>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Calendar className="h-4 w-4" />
                                         <span>
                                             {task.dateType === 'flexible'
-                                                ? 'Flexible'
-                                                : task.dateType === 'on_date'
-                                                    ? `On ${new Date(task.date!).toLocaleDateString()}`
-                                                    : `Before ${new Date(task.date!).toLocaleDateString()}`}
+                                                ? 'Flexible date'
+                                                : task.date
+                                                    ? `${task.dateType === 'before_date' ? 'Before ' : 'On '}${new Date(task.date).toLocaleDateString()}`
+                                                    : 'Date not specified'}
+                                            {task.timeOfDay && <span className="capitalize"> ({task.timeOfDay})</span>}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -108,6 +116,45 @@ export default function TaskDetailPage() {
                                 <h2 className="font-semibold text-lg mb-3">Task Description</h2>
                                 <p className="text-gray-700 whitespace-pre-line">{task.description}</p>
                             </div>
+
+                            {/* Attachments Section */}
+                            {task.attachments && task.attachments.length > 0 && (
+                                <div className="bg-white rounded-lg border p-6">
+                                    <h2 className="font-semibold text-lg mb-4">Attachments ({task.attachments.length})</h2>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                        {task.attachments.map((att) => (
+                                            <a
+                                                key={att.id}
+                                                href={att.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="group relative block border rounded-lg overflow-hidden hover:border-primary transition-colors"
+                                            >
+                                                {att.type === 'image' ? (
+                                                    <div className="aspect-square relative bg-gray-100">
+                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                        <img
+                                                            src={att.url}
+                                                            alt={att.name}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className="aspect-square flex flex-col items-center justify-center bg-gray-50 p-4">
+                                                        <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mb-2">
+                                                            <span className="text-2xl">📄</span>
+                                                        </div>
+                                                        <span className="text-xs text-center text-gray-600 truncate w-full px-2">
+                                                            {att.name}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                                            </a>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Offers Section */}
                             {offers && offers.length > 0 && (
@@ -163,8 +210,10 @@ export default function TaskDetailPage() {
                                 <h3 className="font-semibold mb-4">Posted By</h3>
                                 <div className="flex items-center gap-3 mb-4">
                                     <Avatar className="h-12 w-12">
-                                        <AvatarImage src={task.poster?.avatar} />
-                                        <AvatarFallback>{task.poster?.name.charAt(0)}</AvatarFallback>
+                                        <AvatarImage src={task.poster?.avatar_url || task.poster?.avatar || '/avatars/user.png'} />
+                                        <AvatarFallback>
+                                            <img src="/avatars/user.png" alt={task.poster?.name} className="w-full h-full object-cover" />
+                                        </AvatarFallback>
                                     </Avatar>
                                     <div>
                                         <div className="flex items-center gap-2">

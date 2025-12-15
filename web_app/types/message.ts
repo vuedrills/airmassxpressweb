@@ -19,6 +19,11 @@ export interface Conversation {
     }[];
     lastMessage?: Message;
     unreadCount: number;
+    task_id?: string; // Optional link to task
+    task?: {
+        id: string;
+        title: string;
+    };
     createdAt: string;
     updatedAt: string;
 }

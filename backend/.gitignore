@@ -1,0 +1,27 @@
+# Binaries
+backend
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test files
+*.test
+*.out
+
+# Go workspace file
+go.work
+
+# Environment variables
+
+
+# IDE
+.vscode/
+.idea/
+
+# Uploads (local development)
+uploads/
+
+# Logs
+*.log

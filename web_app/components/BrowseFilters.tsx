@@ -8,7 +8,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Check } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 
 interface SortFilterProps {
     value: string;
@@ -37,9 +37,9 @@ export function SortFilter({ value, onChange }: SortFilterProps) {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="px-4 py-2 border rounded-md text-sm bg-white"
+                className="px-4 py-2 border rounded-md text-sm bg-white flex items-center"
             >
-                Sort ▼
+                Sort <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
             </button>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="sm:max-w-md">
@@ -73,6 +73,76 @@ export function SortFilter({ value, onChange }: SortFilterProps) {
     );
 }
 
+export interface Category {
+    id: string;
+    name: string;
+    slug?: string;
+    icon?: string;
+}
+
+interface CategoryFilterProps {
+    categories: Category[] | undefined;
+    selectedCategory: string;
+    onChange: (category: string) => void;
+}
+
+export function CategoryFilter({ categories, selectedCategory, onChange }: CategoryFilterProps) {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleSelect = (categoryName: string) => {
+        onChange(categoryName);
+        setIsOpen(false);
+    };
+
+    return (
+        <>
+            <button
+                onClick={() => setIsOpen(true)}
+                className="px-4 py-2 border rounded-md text-sm bg-white flex items-center flex-shrink-0"
+            >
+                {selectedCategory || 'Category'} <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
+            </button>
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-gray-500 text-sm font-normal">CATEGORY</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid grid-cols-1 gap-2 max-h-[60vh] overflow-y-auto">
+                        <button
+                            onClick={() => handleSelect('')}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${!selectedCategory
+                                ? 'bg-blue-50 text-[#1a2847]'
+                                : 'hover:bg-gray-50'
+                                }`}
+                        >
+                            <span className="flex-1 text-left font-medium">All Categories</span>
+                            {!selectedCategory && <Check className="h-5 w-5 text-[#1a2847]" />}
+                        </button>
+                        {categories?.map((cat) => (
+                            <button
+                                key={cat.id}
+                                onClick={() => handleSelect(cat.name)}
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${selectedCategory === cat.name
+                                    ? 'bg-blue-50 text-[#1a2847]'
+                                    : 'hover:bg-gray-50'
+                                    }`}
+                            >
+                                <span className="flex-1 text-left font-medium">{cat.name}</span>
+                                {selectedCategory === cat.name && <Check className="h-5 w-5 text-[#1a2847]" />}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex gap-3 mt-4">
+                        <Button variant="outline" onClick={() => setIsOpen(false)} className="flex-1">
+                            Cancel
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </>
+    );
+}
+
 interface PriceFilterProps {
     onApply: (min: number, max: number) => void;
 }
@@ -91,9 +161,9 @@ export function PriceFilter({ onApply }: PriceFilterProps) {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="px-4 py-2 border rounded-md text-sm bg-white"
+                className="px-4 py-2 border rounded-md text-sm bg-white flex items-center"
             >
-                ${minPrice} - ${maxPrice.toLocaleString()} ▼
+                ${minPrice} - ${maxPrice.toLocaleString()} <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
             </button>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="sm:max-w-md">
@@ -154,9 +224,9 @@ export function LocationFilter({ onApply }: LocationFilterProps) {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="px-4 py-2 border rounded-md text-sm bg-white"
+                className="px-4 py-2 border rounded-md text-sm bg-white flex items-center"
             >
-                {distance}km {location} ▼
+                {distance}km {location} <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
             </button>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="sm:max-w-md">
@@ -263,9 +333,9 @@ export function OtherFilters({ onApply }: OtherFiltersProps) {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="px-4 py-2 border rounded-md text-sm bg-white"
+                className="px-4 py-2 border rounded-md text-sm bg-white flex items-center"
             >
-                Other filters ({activeCount}) ▼
+                Other filters ({activeCount}) <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
             </button>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="sm:max-w-lg">

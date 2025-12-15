@@ -1,0 +1,22 @@
+export const EQUIPMENT_CATEGORIES = [
+    "Roller Compactor",
+    "Plate Compactor",
+    "Compressor",
+    "Motor Grader",
+    "Water Bowser",
+    "Horse and Trailor",
+    "Rigid Truck",
+    "Generator",
+    "Deck pan",
+    "Lowbed (all sizes)",
+    "Excavator",
+    "Bulldozer",
+    "Concrete Mixer",
+    "Forklift",
+    "Loader",
+    "TLB (Backhoe Loader)",
+    "Tipper (Dump Truck)",
+    "Tower Crane",
+    "Mobile Crane",
+    "Scaffolds"
+];

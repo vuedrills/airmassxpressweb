@@ -1,0 +1,44 @@
+[
+    {
+        "id": "dispute-1",
+        "taskId": "task-6",
+        "offerId": "offer-6-1",
+        "raisedBy": "poster",
+        "raisedById": "user-5",
+        "reason": "poor_quality",
+        "description": "The painting work has missed several spots and the finish is not smooth in many areas. I pointed this out but tasker refused to fix properly.",
+        "status": "under_review",
+        "createdAt": "2024-12-02T11:00:00Z",
+        "updatedAt": "2024-12-02T11:00:00Z"
+    },
+    {
+        "id": "dispute-2",
+        "taskId": "task-7",
+        "offerId": "offer-7-1",
+        "raisedBy": "tasker",
+        "raisedById": "user-9",
+        "reason": "payment_issue",
+        "description": "Client is refusing to release payment even though I completed all the work as agreed. All photos were delivered on time.",
+        "status": "resolved",
+        "resolution": "full_payment",
+        "resolutionNotes": "After review, evidence shows all deliverables were met. Payment released to tasker.",
+        "resolvedAt": "2024-11-28T16:00:00Z",
+        "createdAt": "2024-11-26T10:00:00Z",
+        "updatedAt": "2024-11-28T16:00:00Z"
+    },
+    {
+        "id": "dispute-3",
+        "taskId": "task-10",
+        "offerId": "offer-10-1",
+        "raisedBy": "poster",
+        "raisedById": "user-9",
+        "reason": "work_not_completed",
+        "description": "Mechanic diagnosed the issue but didn't actually fix the problem. Car is still misfiring.",
+        "status": "resolved",
+        "resolution": "partial_refund_50_50",
+        "resolutionNotes": "Diagnostic work was completed, but repair was not. Split payment 50/50.",
+        "resolvedAt": "2024-12-05T14:00:00Z",
+        "createdAt": "2024-12-04T16:00:00Z",
+        "updatedAt": "2024-12-05T14:00:00Z"
+    }
+]

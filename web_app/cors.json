@@ -1,0 +1,21 @@
+[
+    {
+        "origin": [
+            "http://localhost:3000",
+            "https://airmass-9ca5e.web.app"
+        ],
+        "method": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "HEAD",
+            "OPTIONS"
+        ],
+        "responseHeader": [
+            "Content-Type",
+            "x-goog-resumable"
+        ],
+        "maxAgeSeconds": 3600
+    }
+]

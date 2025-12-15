@@ -36,6 +36,26 @@ export default function LoginPage() {
         }
     };
 
+    const quickLogin = async (email: string, password: string) => {
+        setEmail(email);
+        setPassword(password);
+        setIsLoading(true);
+
+        try {
+            const user = await authenticateUser(email, password);
+            if (user) {
+                login(user);
+                router.push('/dashboard');
+            } else {
+                alert('Invalid credentials');
+            }
+        } catch (error) {
+            alert('Login failed');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="flex flex-col min-h-screen">
             <Header />
@@ -75,6 +95,29 @@ export default function LoginPage() {
                                 {isLoading ? 'Logging in...' : 'Log In'}
                             </Button>
                         </form>
+
+                        {/* Quick Login Buttons */}
+                        <div className="mt-4 space-y-2">
+                            <p className="text-xs text-gray-500 text-center mb-2">Quick Login (Dev):</p>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full text-sm"
+                                onClick={() => quickLogin('reefai@gmail.com', '12345678')}
+                                disabled={isLoading}
+                            >
+                                Login as reefai@gmail.com
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full text-sm"
+                                onClick={() => quickLogin('ju@afds.om', '12345678')}
+                                disabled={isLoading}
+                            >
+                                Login as ju@afds.om
+                            </Button>
+                        </div>
 
                         <div className="mt-6">
                             <Button variant="outline" className="w-full">
