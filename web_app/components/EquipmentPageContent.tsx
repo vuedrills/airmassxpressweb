@@ -6,7 +6,7 @@ import { fetchTasks, fetchTaskById } from '@/lib/api';
 import { Task } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Search, Filter, Calendar, DollarSign, ArrowLeft } from 'lucide-react';
+import { MapPin, Search, Filter, Calendar, DollarSign, ArrowLeft, CheckCircle2, Star } from 'lucide-react';
 import Link from 'next/link';
 import { getAvatarSrc } from '@/lib/utils';
 import MakeOfferButton from '@/components/MakeOfferButton';
@@ -38,7 +38,7 @@ export default function EquipmentPageContent() {
         queryFn: () => fetchTasks({ taskType: 'equipment' }),
     });
 
-    // Simple filters (Search only for simplicity MVP)
+    // Simple filters (Search only Eqiupment tasks for now)
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredTasks = useMemo(() => {
@@ -60,7 +60,7 @@ export default function EquipmentPageContent() {
 
     return (
         <GoogleMapsLoader>
-            <div className="flex flex-col min-h-screen bg-amber-50">
+            <div className="flex flex-col min-h-screen bg-gray-50">
                 <NotificationBanner
                     notification={currentNotification}
                     onDismiss={dismissCurrentNotification}
@@ -73,7 +73,7 @@ export default function EquipmentPageContent() {
                         <div className="mb-6 flex justify-between items-center">
                             <div>
                                 <h1 className="text-3xl font-heading font-bold text-gray-900 flex items-center gap-2">
-                                    🚜 Equipment Hire
+                                    Equipment Hire
                                 </h1>
                                 <p className="text-gray-600">Find heavy machinery and equipment for your projects</p>
                             </div>
@@ -105,7 +105,7 @@ export default function EquipmentPageContent() {
                         <div className="flex flex-col md:flex-row gap-2">
                             {/* Left Sidebar - List */}
                             <div className="md:w-[34%] md:flex-shrink-0">
-                                <div className="max-h-[calc(100vh-250px)] overflow-y-auto space-y-2">
+                                <div className="max-h-[calc(100vh-200px)] overflow-y-auto space-y-2">
                                     {isLoading ? (
                                         <div className="text-center py-8 text-gray-500">Loading machinery...</div>
                                     ) : filteredTasks && filteredTasks.length > 0 ? (
@@ -113,54 +113,49 @@ export default function EquipmentPageContent() {
                                             <button
                                                 key={task.id}
                                                 onClick={() => setSelectedTaskId(task.id)}
-                                                className={`w-full text-left bg-white rounded-lg border p-4 hover:border-amber-500 transition-all ${selectedTaskId === task.id ? 'border-amber-500 shadow-md ring-1 ring-amber-500' : ''
+                                                className={`w-full text-left bg-white rounded-lg border p-4 hover:border-[#1a2847] transition-all ${selectedTaskId === task.id ? 'border-[#1a2847] shadow-md' : ''
                                                     }`}
                                             >
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <h3 className="font-semibold text-gray-900 pr-2 flex-1 line-clamp-2">
+                                                <div className="flex items-start justify-between mb-3">
+                                                    <h3 className="font-semibold text-gray-900 pr-4 flex-1">
                                                         {task.title}
                                                     </h3>
-                                                    <div className="text-right">
-                                                        <div className="font-bold text-gray-900 text-lg font-heading">
-                                                            ${task.budget}
-                                                        </div>
-                                                        <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${task.status === 'open' ? 'bg-green-100 text-green-700' :
-                                                            task.status === 'assigned' ? 'bg-blue-100 text-blue-700' :
-                                                                'bg-gray-100 text-gray-700'
-                                                            }`}>
-                                                            {task.status}
+                                                    <div className="text-right font-bold text-gray-900 text-lg font-heading" style={{ fontFamily: 'var(--font-fjalla), "Fjalla One", sans-serif' }}>
+                                                        ${task.budget}
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-1 text-sm text-gray-600 mb-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <MapPin className="h-4 w-4 flex-shrink-0" />
+                                                        <span className="truncate">{task.location.split(',')[0]}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Calendar className="h-4 w-4 flex-shrink-0" />
+                                                        <span>
+                                                            {task.dateType === 'flexible'
+                                                                ? 'Flexible date'
+                                                                : task.date || 'No date'}
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div className="space-y-2 text-sm text-gray-600 mb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <MapPin className="h-4 w-4 text-gray-400" />
-                                                        <span className="truncate">{task.location.split(',')[0]}</span>
-                                                    </div>
 
-                                                    {/* Poster Info */}
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge className={`px-2 py-0.5 rounded ${task.status === 'open' ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-gray-100 text-gray-800'}`}>
+                                                            {task.status.toUpperCase()}
+                                                        </Badge>
+                                                        <span className="text-gray-600">· {task.offerCount || 0} offers</span>
+                                                    </div>
                                                     {task.poster && (
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex-shrink-0">
                                                             <img
                                                                 src={getAvatarSrc(task.poster)}
                                                                 alt={task.poster.name}
-                                                                className="w-5 h-5 rounded-full object-cover bg-gray-200"
+                                                                className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
                                                             />
-                                                            <span className="text-xs text-gray-500">
-                                                                {task.poster.name}
-                                                            </span>
                                                         </div>
                                                     )}
-                                                </div>
-                                                <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
-                                                    <div className="text-xs font-medium text-gray-500 flex items-center gap-1">
-                                                        <span className="bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded">
-                                                            {task.offerCount || 0} bids
-                                                        </span>
-                                                    </div>
-                                                    <div className="text-xs text-gray-400">
-                                                        {new Date(task.createdAt).toLocaleDateString()}
-                                                    </div>
                                                 </div>
                                             </button>
                                         ))
@@ -175,21 +170,21 @@ export default function EquipmentPageContent() {
                             {/* Right Section - Map/Detail */}
                             <div className="md:flex-1">
                                 {selectedTask ? (
-                                    <div className="h-full overflow-y-auto p-6">
-                                        <Button
-                                            variant="ghost"
-                                            className="mb-4 pl-0 hover:pl-2 transition-all"
-                                            onClick={() => setSelectedTaskId(null)}
-                                        >
-                                            <ArrowLeft className="h-4 w-4 mr-2" />
-                                            Return to list
-                                        </Button>
+                                    <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
+                                        <div className="bg-white rounded-lg border p-6">
+                                            <button
+                                                onClick={() => setSelectedTaskId(null)}
+                                                className="flex items-center gap-2 text-[#1a2847] hover:underline mb-4 text-sm font-medium"
+                                            >
+                                                <ArrowLeft className="h-4 w-4" />
+                                                Return to list
+                                            </button>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            {/* Left Column: Details */}
-                                            <div className="md:col-span-2 space-y-6">
-                                                <div>
-                                                    <div className="flex gap-2 mb-3">
+                                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                                {/* Main Content */}
+                                                <div className="lg:col-span-2">
+                                                    {/* Header Badges */}
+                                                    <div className="flex gap-2 mb-6 items-center">
                                                         <span className={`inline-block text-xs uppercase font-bold px-2 py-1 rounded-md ${selectedTask.status === 'open' ? 'bg-green-100 text-green-700' :
                                                             selectedTask.status === 'assigned' ? 'bg-blue-100 text-blue-700' :
                                                                 'bg-gray-100 text-gray-700'
@@ -199,73 +194,89 @@ export default function EquipmentPageContent() {
                                                         <Badge variant="outline">{selectedTask.category}</Badge>
                                                     </div>
 
-                                                    <h1 className="font-heading text-3xl font-bold text-[#1a2847] mb-2">
+                                                    <h1 className="font-heading text-3xl font-bold text-[#1a2847] mb-4 leading-tight" style={{ fontFamily: 'var(--font-fjalla), "Fjalla One", sans-serif' }}>
                                                         {selectedTask.title}
                                                     </h1>
 
-                                                    <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-6">
-                                                        <div className="flex items-center gap-1">
-                                                            <MapPin className="h-4 w-4" />
-                                                            <span>{selectedTask.location}</span>
+                                                    {/* Posted By Section (Matching Browse Page) */}
+                                                    {selectedTask.poster && (
+                                                        <div className="mb-6 pb-6 border-b">
+                                                            <div className="text-xs text-gray-600 mb-3">POSTED BY</div>
+                                                            <div className="flex items-center gap-3">
+                                                                <img
+                                                                    src={getAvatarSrc(selectedTask.poster)}
+                                                                    alt={selectedTask.poster.name}
+                                                                    className="w-12 h-12 rounded-full object-cover hover:ring-2 hover:ring-[#1a2847] transition-all cursor-pointer"
+                                                                />
+                                                                <div>
+                                                                    <div className="font-semibold text-sm flex items-center gap-1">
+                                                                        {selectedTask.poster.name}
+                                                                        {selectedTask.poster.isVerified && <CheckCircle2 className="h-3 w-3 text-blue-600" />}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                                                        <span>{selectedTask.poster.rating ? selectedTask.poster.rating.toFixed(1) : 'New'}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <Calendar className="h-4 w-4" />
+                                                    )}
+
+                                                    {/* Locations and Date */}
+                                                    <div className="space-y-3 text-sm text-gray-600 mb-6">
+                                                        <div className="flex items-center gap-2">
+                                                            <MapPin className="h-5 w-5" />
+                                                            <span>{selectedTask.location}</span>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setMapFocusTaskId(selectedTask.id);
+                                                                    setSelectedTaskId(null);
+                                                                }}
+                                                                className="text-[#1a2847] hover:underline ml-2 bg-transparent border-none p-0 cursor-pointer font-medium"
+                                                            >
+                                                                View map
+                                                            </button>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <Calendar className="h-5 w-5" />
+                                                            <span className="font-semibold text-gray-900">TO BE DONE</span>
                                                             <span>{selectedTask.dateType === 'flexible' ? 'Flexible Date' : selectedTask.date || 'No date'}</span>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <div className="bg-white rounded-lg border p-6">
-                                                    <h3 className="font-semibold text-lg mb-3">Description</h3>
-                                                    <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-                                                        {selectedTask.description}
-                                                    </p>
-                                                </div>
-
-                                                {/* Posted By Section (Mobile only, or kept here if sidebar is full) 
-                                                    But screenshot has it in 'Posted By' area. Detailed view usually puts it in sidebar or top.
-                                                    We'll put it in sidebar to match 'Task Detail'.
-                                                */}
-                                            </div>
-
-                                            {/* Right Column: Sidebar */}
-                                            <div className="space-y-6">
-                                                {/* Budget Card */}
-                                                <div className="bg-white rounded-lg border p-6 shadow-sm">
-                                                    <p className="text-xs text-gray-500 uppercase font-bold mb-1">Task Budget</p>
-                                                    <div className="text-4xl font-bold text-[#1a2847] mb-4">
-                                                        ${selectedTask.budget}
-                                                    </div>
-
-                                                    {/* Make Offer Button */}
-                                                    <MakeOfferButton taskId={selectedTask.id} variant="default" className="w-full mb-3" />
-
-                                                    {/* Other actions if needed */}
-                                                </div>
-
-                                                {/* Poster Info Card */}
-                                                {selectedTask.poster && (
-                                                    <div className="bg-white rounded-lg border p-6">
-                                                        <h3 className="text-xs font-bold text-gray-500 uppercase mb-4">Posted By</h3>
-                                                        <div className="flex items-center gap-3">
-                                                            <img
-                                                                src={getAvatarSrc(selectedTask.poster)}
-                                                                alt={selectedTask.poster.name}
-                                                                className="w-12 h-12 rounded-full object-cover bg-gray-200"
-                                                            />
-                                                            <div>
-                                                                <p className="font-semibold text-gray-900">
-                                                                    {selectedTask.poster.name}
-                                                                </p>
-                                                                {selectedTask.poster.isVerified && (
-                                                                    <div className="flex items-center text-green-600 text-xs mt-0.5">
-                                                                        <span className="font-medium">Verified User</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
+                                                    {/* Description */}
+                                                    <div className="mb-6">
+                                                        <h3 className="font-bold text-lg text-gray-900 mb-3">Description</h3>
+                                                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                                            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed text-sm">
+                                                                {selectedTask.description}
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                )}
+                                                </div>
+
+                                                {/* Sidebar - Budget & Actions */}
+                                                <div>
+                                                    <div className="bg-white border rounded-lg p-6">
+                                                        <div className="text-center mb-4">
+                                                            <div className="text-xs text-gray-600 mb-1">TASK BUDGET</div>
+                                                            <div className="font-heading text-4xl font-bold text-[#1a2847]" style={{ fontFamily: 'var(--font-fjalla), "Fjalla One", sans-serif' }}>
+                                                                ${selectedTask.budget}
+                                                            </div>
+                                                        </div>
+                                                        <MakeOfferButton taskId={selectedTask.id} variant="default" className="w-full" />
+                                                        <select className="w-full px-4 py-2 border rounded-md text-sm mt-2">
+                                                            <option>More Options</option>
+                                                            <option>Report this task</option>
+                                                            <option>Save task</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Tabs */}
+                                            <div className="mt-4">
+                                                <TaskDetailTabs task={selectedTask} />
                                             </div>
                                         </div>
                                     </div>
@@ -282,7 +293,7 @@ export default function EquipmentPageContent() {
                         </div>
                     </div>
                 </main>
-            </div>
-        </GoogleMapsLoader>
+            </div >
+        </GoogleMapsLoader >
     );
 }
