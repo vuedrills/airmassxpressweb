@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar as CalendarIcon, MapPin, DollarSign, CheckCircle2, Loader2, FileText, ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { cn, resizeImage } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCategories, createTask, addTaskAttachments } from '@/lib/api';
+import { fetchCategories, createTask, addTaskAttachments, fetchEquipmentCapacities } from '@/lib/api';
 import { GoogleMapsLoader } from '@/components/GoogleMapsLoader';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { FileUpload } from '@/components/FileUpload';
@@ -18,6 +18,7 @@ import { EQUIPMENT_CATEGORIES } from '@/lib/constants';
 import { storage, auth } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signInAnonymously } from 'firebase/auth';
+import type { EquipmentCapacity } from '@/types';
 
 export default function PostEquipmentPage() {
     const router = useRouter();
@@ -28,13 +29,21 @@ export default function PostEquipmentPage() {
     const [uploadHighQuality, setUploadHighQuality] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<string>('');
     const [error, setError] = useState('');
-    const totalSteps = 4; // Simplified steps
+    const totalSteps = 4;
+
+    // Fetch equipment capacities from API
+    const { data: capacitiesData } = useQuery({
+        queryKey: ['equipmentCapacities'],
+        queryFn: fetchEquipmentCapacities,
+    });
+
+    // Get capacities for current category
+    const categoryCapacities = capacitiesData?.grouped?.[currentTaskDraft.category || ''] || [];
 
     useEffect(() => {
         if (!loggedInUser) {
             router.push('/login');
         } else {
-            // Force equipment type
             updateTaskDraft({
                 taskType: 'equipment',
             });
@@ -176,7 +185,8 @@ export default function PostEquipmentPage() {
                                                     value={currentTaskDraft.title || ''}
                                                     onChange={(e) => updateTaskDraft({
                                                         title: e.target.value,
-                                                        category: e.target.value // Sync category with machine type for inventory matching
+                                                        category: e.target.value,
+                                                        requiredCapacityId: undefined // Reset capacity when type changes
                                                     })}
                                                 >
                                                     <option value="">Select Equipment Type</option>
@@ -185,6 +195,28 @@ export default function PostEquipmentPage() {
                                                     ))}
                                                 </select>
                                             </div>
+
+                                            {/* V2: Capacity Selection from API */}
+                                            {categoryCapacities.length > 0 && (
+                                                <div>
+                                                    <label className="block text-sm font-medium mb-2">Required Size/Capacity</label>
+                                                    <select
+                                                        className="w-full px-3 py-2 border rounded-md bg-white"
+                                                        value={(currentTaskDraft as any).requiredCapacityId || ''}
+                                                        onChange={(e) => updateTaskDraft({
+                                                            requiredCapacityId: e.target.value || undefined
+                                                        } as any)}
+                                                    >
+                                                        <option value="">Any size (flexible)</option>
+                                                        {categoryCapacities.map((cap: EquipmentCapacity) => (
+                                                            <option key={cap.id} value={cap.id}>
+                                                                {cap.capacityCode} - {cap.displayName}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <p className="text-xs text-gray-500 mt-1">Optional: Specify minimum capacity needed</p>
+                                                </div>
+                                            )}
 
                                             <div>
                                                 <label className="block text-sm font-medium mb-2">Job Description *</label>
@@ -235,11 +267,100 @@ export default function PostEquipmentPage() {
                                         </div>
                                     )}
 
-                                    {/* Step 3: Timing & Budget */}
                                     {step === 3 && (
                                         <div className="space-y-6">
                                             <div>
                                                 <h2 className="text-2xl font-bold mb-2">Timing & Budget</h2>
+                                            </div>
+
+                                            {/* V2: Hire Duration Type */}
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">Hire Duration Type</label>
+                                                <div className="grid grid-cols-4 gap-2">
+                                                    {(['hourly', 'daily', 'weekly', 'monthly'] as const).map((type) => (
+                                                        <label
+                                                            key={type}
+                                                            className={`p-3 border rounded-lg cursor-pointer text-center transition-colors ${(currentTaskDraft as any).hireDurationType === type
+                                                                ? 'border-[#1a2847] bg-blue-50 text-[#1a2847]'
+                                                                : 'hover:border-gray-300'
+                                                                }`}
+                                                        >
+                                                            <input
+                                                                type="radio"
+                                                                className="hidden"
+                                                                checked={(currentTaskDraft as any).hireDurationType === type}
+                                                                onChange={() => updateTaskDraft({ hireDurationType: type } as any)}
+                                                            />
+                                                            <span className="font-medium capitalize">{type}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* V2: Estimated Hours (if hourly) */}
+                                            {(currentTaskDraft as any).hireDurationType === 'hourly' && (
+                                                <div>
+                                                    <label className="block text-sm font-medium mb-2">Estimated Hours</label>
+                                                    <Input
+                                                        type="number"
+                                                        value={(currentTaskDraft as any).estimatedHours || ''}
+                                                        onChange={(e) => updateTaskDraft({ estimatedHours: parseInt(e.target.value) } as any)}
+                                                        placeholder="e.g., 8"
+                                                        min="1"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* V2: Operator Preference */}
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">Operator Preference</label>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    <label
+                                                        className={`p-3 border rounded-lg cursor-pointer text-center transition-colors ${(currentTaskDraft as any).operatorPreference === 'required'
+                                                            ? 'border-[#1a2847] bg-blue-50'
+                                                            : 'hover:border-gray-300'
+                                                            }`}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            className="hidden"
+                                                            checked={(currentTaskDraft as any).operatorPreference === 'required'}
+                                                            onChange={() => updateTaskDraft({ operatorPreference: 'required' } as any)}
+                                                        />
+                                                        <span className="font-medium text-sm">Required</span>
+                                                        <p className="text-xs text-gray-500 mt-1">Must include operator</p>
+                                                    </label>
+                                                    <label
+                                                        className={`p-3 border rounded-lg cursor-pointer text-center transition-colors ${(currentTaskDraft as any).operatorPreference === 'preferred'
+                                                            ? 'border-[#1a2847] bg-blue-50'
+                                                            : 'hover:border-gray-300'
+                                                            }`}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            className="hidden"
+                                                            checked={(currentTaskDraft as any).operatorPreference === 'preferred'}
+                                                            onChange={() => updateTaskDraft({ operatorPreference: 'preferred' } as any)}
+                                                        />
+                                                        <span className="font-medium text-sm">Preferred</span>
+                                                        <p className="text-xs text-gray-500 mt-1">Owner's choice</p>
+                                                    </label>
+                                                    <label
+                                                        className={`p-3 border rounded-lg cursor-pointer text-center transition-colors ${(currentTaskDraft as any).operatorPreference === 'not_needed'
+                                                            ? 'border-[#1a2847] bg-blue-50'
+                                                            : 'hover:border-gray-300'
+                                                            }`}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            className="hidden"
+                                                            checked={(currentTaskDraft as any).operatorPreference === 'not_needed'}
+                                                            onChange={() => updateTaskDraft({ operatorPreference: 'not_needed' } as any)}
+                                                        />
+                                                        <span className="font-medium text-sm">Dry Hire</span>
+                                                        <p className="text-xs text-gray-500 mt-1">I have my own operator</p>
+                                                    </label>
+                                                </div>
                                             </div>
 
                                             <div>
@@ -312,6 +433,29 @@ export default function PostEquipmentPage() {
                                                     <span className="text-gray-500">Budget</span>
                                                     <span className="col-span-2 font-medium text-lg">${currentTaskDraft.budget}</span>
                                                 </div>
+                                                {/* V2: Hire Duration */}
+                                                {(currentTaskDraft as any).hireDurationType && (
+                                                    <div className="grid grid-cols-3 gap-4 border-b pb-4">
+                                                        <span className="text-gray-500">Hire Duration</span>
+                                                        <span className="col-span-2 font-medium capitalize">
+                                                            {(currentTaskDraft as any).hireDurationType}
+                                                            {(currentTaskDraft as any).hireDurationType === 'hourly' && (currentTaskDraft as any).estimatedHours && (
+                                                                <span className="text-gray-500 ml-1">({(currentTaskDraft as any).estimatedHours} hours)</span>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {/* V2: Operator Preference */}
+                                                {(currentTaskDraft as any).operatorPreference && (
+                                                    <div className="grid grid-cols-3 gap-4 border-b pb-4">
+                                                        <span className="text-gray-500">Operator</span>
+                                                        <span className="col-span-2 font-medium capitalize">
+                                                            {(currentTaskDraft as any).operatorPreference === 'required' && '✅ Required'}
+                                                            {(currentTaskDraft as any).operatorPreference === 'preferred' && '👍 Preferred'}
+                                                            {(currentTaskDraft as any).operatorPreference === 'not_needed' && '🔧 Dry Hire (Not Needed)'}
+                                                        </span>
+                                                    </div>
+                                                )}
                                                 <div className="grid grid-cols-3 gap-4 border-b pb-4">
                                                     <span className="text-gray-500">Timing</span>
                                                     <span className="col-span-2 font-medium">

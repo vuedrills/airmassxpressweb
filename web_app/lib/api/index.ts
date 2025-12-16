@@ -254,10 +254,25 @@ export async function fetchMyInventory(): Promise<import('@/types').InventoryIte
 }
 
 export async function createInventoryItem(item: Partial<import('@/types').InventoryItem>): Promise<import('@/types').InventoryItem> {
-    const payload = {
-        ...item,
-        is_available: item.isAvailable
+    const payload: Record<string, any> = {
+        name: item.name,
+        category: item.category,
+        location: item.location,
+        is_available: item.isAvailable,
     };
+    // V2 fields - map camelCase to snake_case
+    if (item.capacityId) payload.capacity_id = item.capacityId;
+    if (item.capacity) payload.capacity = item.capacity;
+    if (item.withOperator !== undefined) payload.with_operator = item.withOperator;
+    if (item.operatorBundled !== undefined) payload.operator_bundled = item.operatorBundled;
+    if (item.hourlyRate) payload.hourly_rate = item.hourlyRate;
+    if (item.dailyRate) payload.daily_rate = item.dailyRate;
+    if (item.weeklyRate) payload.weekly_rate = item.weeklyRate;
+    if (item.deliveryFee) payload.delivery_fee = item.deliveryFee;
+    if (item.operatorFee) payload.operator_fee = item.operatorFee;
+    if (item.lat) payload.lat = item.lat;
+    if (item.lng) payload.lng = item.lng;
+
     return await apiFetch('/inventory', {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -268,6 +283,49 @@ export async function deleteInventoryItem(id: string): Promise<void> {
     await apiFetch(`/inventory/${id}`, {
         method: 'DELETE',
     });
+}
+
+// ============ EQUIPMENT CAPACITIES API ============
+
+export async function fetchEquipmentCapacities(): Promise<{ capacities: import('@/types').EquipmentCapacity[]; grouped: Record<string, import('@/types').EquipmentCapacity[]> }> {
+    const data = await apiFetch('/equipment-capacities');
+    // Map snake_case to camelCase
+    const mapCapacity = (c: any): import('@/types').EquipmentCapacity => ({
+        id: c.id,
+        equipmentType: c.equipment_type,
+        capacityCode: c.capacity_code,
+        displayName: c.display_name,
+        minWeightTons: c.min_weight_tons,
+        maxWeightTons: c.max_weight_tons,
+        sortOrder: c.sort_order,
+    });
+
+    return {
+        capacities: data.capacities?.map(mapCapacity) || [],
+        grouped: Object.fromEntries(
+            Object.entries(data.grouped || {}).map(([key, caps]) => [
+                key,
+                (caps as any[]).map(mapCapacity)
+            ])
+        ),
+    };
+}
+
+export async function fetchEquipmentCapacitiesByType(equipmentType: string): Promise<import('@/types').EquipmentCapacity[]> {
+    const capacities = await apiFetch(`/equipment-capacities/${encodeURIComponent(equipmentType)}`);
+    return capacities.map((c: any) => ({
+        id: c.id,
+        equipmentType: c.equipment_type,
+        capacityCode: c.capacity_code,
+        displayName: c.display_name,
+        minWeightTons: c.min_weight_tons,
+        maxWeightTons: c.max_weight_tons,
+        sortOrder: c.sort_order,
+    }));
+}
+
+export async function fetchEquipmentTypes(): Promise<string[]> {
+    return await apiFetch('/equipment-types');
 }
 
 // ============ TASKS API ============
@@ -373,19 +431,29 @@ export async function fetchTaskById(id: string): Promise<Task | null> {
 }
 
 export async function createTask(taskData: Partial<Task>): Promise<{ taskId: string }> {
+    const payload: Record<string, any> = {
+        title: taskData.title,
+        description: taskData.description,
+        category: taskData.category,
+        budget: taskData.budget,
+        location: taskData.location,
+        lat: taskData.lat,      // Store coordinates once, never geocode again!
+        lng: taskData.lng,
+        task_type: taskData.taskType,
+        date_type: taskData.dateType,
+        date: taskData.date,
+        time_of_day: taskData.timeOfDay,
+    };
+
+    // V2 Equipment Fields
+    if (taskData.hireDurationType) payload.hire_duration_type = taskData.hireDurationType;
+    if (taskData.estimatedHours) payload.estimated_hours = taskData.estimatedHours;
+    if (taskData.operatorPreference) payload.operator_preference = taskData.operatorPreference;
+    if (taskData.requiredCapacityId) payload.required_capacity_id = taskData.requiredCapacityId;
+
     return await apiFetch('/tasks', {
         method: 'POST',
-        body: JSON.stringify({
-            title: taskData.title,
-            description: taskData.description,
-            category: taskData.category,
-            budget: taskData.budget,
-            location: taskData.location,
-            task_type: taskData.taskType,
-            date_type: taskData.dateType,
-            date: taskData.date,
-            time_of_day: taskData.timeOfDay,
-        }),
+        body: JSON.stringify(payload),
     });
 }
 
@@ -439,15 +507,26 @@ export async function fetchOffersByTask(taskId: string): Promise<Offer[]> {
 }
 
 export async function createOffer(offerData: Partial<Offer>): Promise<Offer> {
+    const payload: Record<string, any> = {
+        task_id: offerData.taskId,
+        amount: offerData.amount,
+        description: offerData.description,
+        estimated_duration: offerData.estimatedDuration,
+        availability: offerData.availability,
+    };
+
+    // V2 Equipment Quote Fields
+    if (offerData.quoteType) payload.quote_type = offerData.quoteType;
+    if (offerData.rateType) payload.rate_type = offerData.rateType;
+    if (offerData.baseRate) payload.base_rate = offerData.baseRate;
+    if (offerData.deliveryFee) payload.delivery_fee = offerData.deliveryFee;
+    if (offerData.operatorFee) payload.operator_fee = offerData.operatorFee;
+    if (offerData.includesOperator !== undefined) payload.includes_operator = offerData.includesOperator;
+    if (offerData.inventoryId) payload.inventory_id = offerData.inventoryId;
+
     return await apiFetch('/offers', {
         method: 'POST',
-        body: JSON.stringify({
-            task_id: offerData.taskId,
-            amount: offerData.amount,
-            description: offerData.description,
-            estimated_duration: offerData.estimatedDuration,
-            availability: offerData.availability,
-        }),
+        body: JSON.stringify(payload),
     });
 }
 

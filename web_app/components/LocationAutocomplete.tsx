@@ -1,8 +1,8 @@
 'use client';
 
 import { Input } from '@/components/ui/input';
-import { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { searchPlaces, PlaceResult } from '@/lib/geocoding';
 
 interface LocationAutocompleteProps {
     value: string;
@@ -11,45 +11,128 @@ interface LocationAutocompleteProps {
     className?: string;
 }
 
-// Dynamically import the component with the autocomplete hook to avoid SSR issues
-const LocationAutocompleteInternal = dynamic(
-    () => import('./LocationAutocompleteInternal').then(mod => ({ default: mod.LocationAutocompleteInternal })),
-    {
-        ssr: false,
-        loading: () => <Input placeholder="Loading..." disabled />,
-    }
-);
-
+/**
+ * Location Autocomplete using Photon (OpenStreetMap)
+ * FREE - No API costs, good Zimbabwe coverage
+ */
 export function LocationAutocomplete({
     value,
     onChange,
     placeholder = 'e.g., Borrowdale, Harare',
     className,
 }: LocationAutocompleteProps) {
-    const [isMounted, setIsMounted] = useState(false);
-    const hasGoogleMaps = typeof window !== 'undefined' && window.google && window.google.maps;
+    const [inputValue, setInputValue] = useState(value);
+    const [suggestions, setSuggestions] = useState<PlaceResult[]>([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
+    // Sync external value
     useEffect(() => {
-        setIsMounted(true);
+        if (value !== inputValue) {
+            setInputValue(value);
+        }
+    }, [value]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Don't render autocomplete on server or if not mounted
-    if (!isMounted || !hasGoogleMaps) {
-        return (
+    // Debounced search (400ms to avoid rate limiting Photon)
+    const doSearch = useCallback(async (query: string) => {
+        if (query.length < 3) {
+            setSuggestions([]);
+            setIsOpen(false);
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const results = await searchPlaces(query);
+            setSuggestions(results);
+            setIsOpen(results.length > 0);
+        } catch (error) {
+            console.error('Search error:', error);
+            setSuggestions([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setInputValue(newValue);
+        onChange(newValue); // Update parent without coordinates yet
+
+        // Debounce the search
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+        debounceRef.current = setTimeout(() => {
+            doSearch(newValue);
+        }, 400);
+    };
+
+    const handleSelect = (place: PlaceResult) => {
+        setInputValue(place.label);
+        setSuggestions([]);
+        setIsOpen(false);
+
+        // Pass both label and coordinates to parent
+        onChange(place.label, { lat: place.lat, lng: place.lng });
+    };
+
+    return (
+        <div ref={containerRef} className="relative">
             <Input
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
+                value={inputValue}
+                onChange={handleInputChange}
+                onFocus={() => suggestions.length > 0 && setIsOpen(true)}
                 placeholder={placeholder}
                 className={className}
             />
-        );
-    }
 
-    // Only use places autocomplete if Google Maps is available and we're on client
-    return <LocationAutocompleteInternal
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className={className}
-    />;
+            {isLoading && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                </div>
+            )}
+
+            {isOpen && suggestions.length > 0 && (
+                <div className="absolute z-50 w-full bg-white border rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto">
+                    {suggestions.map((place, index) => (
+                        <button
+                            key={`${place.lat}-${place.lng}-${index}`}
+                            type="button"
+                            onClick={() => handleSelect(place)}
+                            className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-start gap-2 border-b last:border-b-0 transition-colors"
+                        >
+                            <span className="text-gray-400 mt-0.5">📍</span>
+                            <div className="flex-1 min-w-0">
+                                <div className="font-medium text-gray-900 truncate">
+                                    {place.displayName}
+                                </div>
+                                {place.city && (
+                                    <div className="text-sm text-gray-500 truncate">
+                                        {place.city}{place.country ? `, ${place.country}` : ''}
+                                    </div>
+                                )}
+                            </div>
+                        </button>
+                    ))}
+                    <div className="px-4 py-2 text-xs text-gray-400 bg-gray-50 border-t">
+                        Powered by OpenStreetMap
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }

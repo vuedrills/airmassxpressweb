@@ -153,6 +153,11 @@ export default function EquipmentPageContent() {
                                                                 src={getAvatarSrc(task.poster)}
                                                                 alt={task.poster.name}
                                                                 className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
+                                                                onError={(e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    if (target.src.includes('/avatars/default.png')) return;
+                                                                    target.src = '/avatars/default.png';
+                                                                }}
                                                             />
                                                         </div>
                                                     )}
@@ -207,6 +212,11 @@ export default function EquipmentPageContent() {
                                                                     src={getAvatarSrc(selectedTask.poster)}
                                                                     alt={selectedTask.poster.name}
                                                                     className="w-12 h-12 rounded-full object-cover hover:ring-2 hover:ring-[#1a2847] transition-all cursor-pointer"
+                                                                    onError={(e) => {
+                                                                        const target = e.target as HTMLImageElement;
+                                                                        if (target.src.includes('/avatars/default.png')) return;
+                                                                        target.src = '/avatars/default.png';
+                                                                    }}
                                                                 />
                                                                 <div>
                                                                     <div className="font-semibold text-sm flex items-center gap-1">
@@ -244,6 +254,41 @@ export default function EquipmentPageContent() {
                                                         </div>
                                                     </div>
 
+                                                    {/* V2: Equipment Request Details */}
+                                                    <div className="mb-6 grid grid-cols-2 md:grid-cols-3 gap-3">
+                                                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                                                            <div className="text-xs text-blue-600 font-medium mb-1">Hire Duration</div>
+                                                            <div className="font-semibold capitalize text-blue-900">
+                                                                {(selectedTask as any).hireDurationType || (selectedTask as any).hire_duration_type || 'Flexible'}
+                                                                {((selectedTask as any).estimatedHours || (selectedTask as any).estimated_hours) && (
+                                                                    <span className="text-sm font-normal ml-1">
+                                                                        ({(selectedTask as any).estimatedHours || (selectedTask as any).estimated_hours}h)
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
+                                                            <div className="text-xs text-amber-600 font-medium mb-1">Operator</div>
+                                                            <div className="font-semibold text-amber-900">
+                                                                {(() => {
+                                                                    const pref = (selectedTask as any).operatorPreference || (selectedTask as any).operator_preference;
+                                                                    if (pref === 'required') return '✅ Required';
+                                                                    if (pref === 'preferred') return '👍 Preferred';
+                                                                    if (pref === 'not_needed') return '🔧 Dry Hire';
+                                                                    return '📋 Contact Poster';
+                                                                })()}
+                                                            </div>
+                                                        </div>
+                                                        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                                                            <div className="text-xs text-green-600 font-medium mb-1">Capacity</div>
+                                                            <div className="font-semibold text-green-900">
+                                                                {(selectedTask as any).requiredCapacityId || (selectedTask as any).required_capacity_id
+                                                                    ? 'As Specified'
+                                                                    : 'Any Size'}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
                                                     {/* Description */}
                                                     <div className="mb-6">
                                                         <h3 className="font-bold text-lg text-gray-900 mb-3">Description</h3>
@@ -264,7 +309,7 @@ export default function EquipmentPageContent() {
                                                                 ${selectedTask.budget}
                                                             </div>
                                                         </div>
-                                                        <MakeOfferButton taskId={selectedTask.id} variant="default" className="w-full" />
+                                                        <MakeOfferButton taskId={selectedTask.id} task={selectedTask} variant="default" className="w-full" />
                                                         <select className="w-full px-4 py-2 border rounded-md text-sm mt-2">
                                                             <option>More Options</option>
                                                             <option>Report this task</option>

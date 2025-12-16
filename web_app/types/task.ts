@@ -2,6 +2,8 @@
 export type TaskStatus = 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled' | 'revision_requested' | 'dispute';
 export type DateType = 'on_date' | 'before_date' | 'flexible';
 export type TimeOfDay = 'morning' | 'midday' | 'afternoon' | 'evening';
+export type HireDurationType = 'hourly' | 'daily' | 'weekly' | 'monthly';
+export type OperatorPreference = 'required' | 'preferred' | 'not_needed';
 
 export interface Task {
     id: string;
@@ -47,6 +49,12 @@ export interface Task {
         amount: number;
         conversationId?: string;
     };
+
+    // V2 Equipment Fields
+    hireDurationType?: HireDurationType;
+    estimatedHours?: number;
+    operatorPreference?: OperatorPreference;
+    requiredCapacityId?: string;
 }
 
 export interface Category {

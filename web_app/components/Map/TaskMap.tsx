@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import { Task } from '@/types';
+import { geocodeAddress } from '@/lib/geocoding';
 
 interface TaskMapProps {
     tasks: Task[];
@@ -82,15 +83,13 @@ export default function TaskMap({ tasks, onTaskSelect, focusedTaskId }: TaskMapP
             if (taskToFocus.lat && taskToFocus.lng) {
                 performFlyTo(taskToFocus.lng, taskToFocus.lat);
             } else if (taskToFocus.location) {
-                // Geocode on the fly
-                import('use-places-autocomplete').then(async ({ getGeocode, getLatLng }) => {
-                    try {
-                        const results = await getGeocode({ address: taskToFocus.location });
-                        const { lat, lng } = await getLatLng(results[0]);
-                        performFlyTo(lng, lat);
-                    } catch (error) {
-                        console.error("Failed to geocode for flyTo:", error);
+                // Geocode using LocationIQ (FREE 5K/day)
+                geocodeAddress(taskToFocus.location).then(coords => {
+                    if (coords) {
+                        performFlyTo(coords.lng, coords.lat);
                     }
+                }).catch(error => {
+                    console.error("Failed to geocode for flyTo:", error);
                 });
             }
         }
@@ -182,20 +181,18 @@ export default function TaskMap({ tasks, onTaskSelect, focusedTaskId }: TaskMapP
         // Process tasks
         tasks.forEach(async (task) => {
             if (task.lat && task.lng) {
-                // If we have coordinates, use them
+                // If we have coordinates, use them directly (FREE - no API call)
                 addMarker(task, task.lng, task.lat);
             } else if (task.location) {
-                // If no coordinates but we have a location string, try to geocode it
+                // If no coordinates, geocode using LocationIQ (FREE 5K/day)
+                // NOTE: This should rarely happen if we geocode on task creation
                 try {
-                    // We need to dynamically import these to avoid SSR issues and ensure Google Maps is loaded
-                    const { getGeocode, getLatLng } = await import('use-places-autocomplete');
-                    const results = await getGeocode({ address: task.location });
-                    const { lat, lng } = await getLatLng(results[0]);
-                    addMarker(task, lng, lat);
+                    const coords = await geocodeAddress(task.location);
+                    if (coords) {
+                        addMarker(task, coords.lng, coords.lat);
+                    }
                 } catch (error) {
                     console.warn(`Failed to geocode location for task ${task.id} (${task.location}):`, error);
-                    // If geocoding fails, we simply don't show the marker.
-                    // This is better than showing it in the wrong place (Harare).
                 }
             }
         });

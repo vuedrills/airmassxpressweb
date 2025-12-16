@@ -69,7 +69,8 @@ export default function BrowsePage() {
     const filteredTasks = useMemo(() => {
         if (!allTasks) return [];
 
-        let filtered = [...allTasks];
+        // Exclude equipment tasks - they should only appear on the Equipment page
+        let filtered = allTasks.filter((task) => task.taskType !== 'equipment');
 
         // Search filter
         if (searchQuery.trim()) {
@@ -446,7 +447,7 @@ export default function BrowsePage() {
                                                                 ${selectedTask.budget}
                                                             </div>
                                                         </div>
-                                                        <MakeOfferButton taskId={selectedTask.id} />
+                                                        <MakeOfferButton taskId={selectedTask.id} task={selectedTask} />
                                                         <select className="w-full px-4 py-2 border rounded-md text-sm mt-2">
                                                             <option>More Options</option>
                                                             <option>Report this task</option>

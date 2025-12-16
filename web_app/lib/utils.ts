@@ -59,34 +59,53 @@ export async function resizeImage(file: File, maxWidth = 1200, quality = 0.7): P
 }
 import { API_BASE_URL } from '@/lib/api';
 
-// Helper function to safely extract avatar src from string or object
-export const getAvatarSrc = (avatar: any): string | undefined => {
-  // If it's a string, use it directly
+// Helper function to safely extract avatar src from string, object, or User
+export const getAvatarSrc = (input: any): string => {
+  const DEFAULT_AVATAR = '/avatars/default.png';
+
+  if (!input) return DEFAULT_AVATAR;
+
   let avatarUrl: string | undefined;
 
-  if (typeof avatar === 'string' && avatar) {
-    avatarUrl = avatar;
-  } else if (avatar && typeof avatar === 'object') {
-    avatarUrl = (avatar as any).url || (avatar as any).src || (avatar as any).path || (avatar as any).file_path || (avatar as any).avatar_url;
+  // If it's already a string URL, use it
+  if (typeof input === 'string' && input) {
+    avatarUrl = input;
+  } else if (input && typeof input === 'object') {
+    // Check common avatar field names (for User objects and avatar data)
+    avatarUrl =
+      input.avatar ||           // User.avatar
+      input.url ||
+      input.src ||
+      input.path ||
+      input.file_path ||
+      input.avatar_url ||
+      input.avatarUrl ||
+      input.image ||
+      input.profileImage;
   }
 
   // Fallback to default image if no avatar found
-  if (!avatarUrl) {
-    return '/default.png';
+  if (!avatarUrl || avatarUrl === '' || avatarUrl === 'null' || avatarUrl === 'undefined') {
+    return DEFAULT_AVATAR;
   }
 
-  if (avatarUrl) {
+  // Handle various URL formats
+  if (avatarUrl.startsWith('http') || avatarUrl.startsWith('blob:') || avatarUrl.startsWith('data:') || avatarUrl.startsWith('/')) {
+    // For absolute URLs or paths starting with /, return as-is
     if (avatarUrl.startsWith('http') || avatarUrl.startsWith('blob:') || avatarUrl.startsWith('data:')) {
       return avatarUrl;
     }
-    // Prepend backend host if it's a relative path from backend
-    // Assuming backend is at localhost:8080/api/v1 -> localhost:8080
-    // We strip /api/v1
-    const host = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
-    return `${host}${avatarUrl.startsWith('/') ? '' : '/'}${avatarUrl}`;
+    // For paths starting with /, check if it's a backend path or public path
+    if (avatarUrl.startsWith('/avatars') || avatarUrl.startsWith('/uploads')) {
+      const host = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
+      return `${host}${avatarUrl}`;
+    }
+    return avatarUrl; // Public folder paths like /default.png
   }
 
-  return undefined;
+  // Prepend backend host for relative paths
+  const host = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
+  return `${host}/${avatarUrl}`;
 };
 
 // Helper function to safely format dates

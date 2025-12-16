@@ -20,10 +20,20 @@ type Offer struct {
 	UpdatedAt         time.Time      `json:"updated_at"`
 	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
 
+	// V2 Equipment Quote Fields
+	QuoteType        string     `gorm:"type:varchar(20)" json:"quote_type,omitempty"` // structured, flexible
+	RateType         string     `gorm:"type:varchar(20)" json:"rate_type,omitempty"`  // hourly, daily, weekly
+	BaseRate         *float64   `gorm:"type:decimal(10,2)" json:"base_rate,omitempty"`
+	DeliveryFee      *float64   `gorm:"type:decimal(10,2)" json:"delivery_fee,omitempty"`
+	OperatorFee      *float64   `gorm:"type:decimal(10,2)" json:"operator_fee,omitempty"`
+	IncludesOperator bool       `gorm:"default:false" json:"includes_operator"`
+	InventoryID      *uuid.UUID `gorm:"type:uuid" json:"inventory_id,omitempty"`
+
 	// Relationships
-	Task    *Task        `gorm:"foreignKey:TaskID" json:"task,omitempty"`
-	Tasker  *User        `gorm:"foreignKey:TaskerID" json:"tasker,omitempty"`
-	Replies []OfferReply `gorm:"foreignKey:OfferID" json:"replies,omitempty"`
+	Task      *Task          `gorm:"foreignKey:TaskID" json:"task,omitempty"`
+	Tasker    *User          `gorm:"foreignKey:TaskerID" json:"tasker,omitempty"`
+	Replies   []OfferReply   `gorm:"foreignKey:OfferID" json:"replies,omitempty"`
+	Inventory *InventoryItem `gorm:"foreignKey:InventoryID" json:"inventory,omitempty"`
 }
 
 type OfferReply struct {

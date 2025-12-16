@@ -29,6 +29,7 @@ func SetupRouter(cfg *config.Config, db *gorm.DB, fcm *services.FCMService, hub 
 	taskerHandler := handlers.NewTaskerHandler(cfg, db)
 	chatHandler := handlers.NewChatHandler(db, hub)
 	commentHandler := handlers.NewCommentHandler(db)
+	equipmentCapacityHandler := handlers.NewEquipmentCapacityHandler(db)
 
 	// Public routes
 	api := router.Group("/api/v1")
@@ -57,6 +58,11 @@ func SetupRouter(cfg *config.Config, db *gorm.DB, fcm *services.FCMService, hub 
 
 		// Public professions
 		api.GET("/professions", taskerHandler.GetProfessions)
+
+		// Equipment capacities (public)
+		api.GET("/equipment-capacities", equipmentCapacityHandler.GetAllCapacities)
+		api.GET("/equipment-capacities/:type", equipmentCapacityHandler.GetCapacitiesByType)
+		api.GET("/equipment-types", equipmentCapacityHandler.GetEquipmentTypes)
 
 		// Admin routes (dev only)
 		admin := api.Group("/admin")

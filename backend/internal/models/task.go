@@ -29,11 +29,18 @@ type Task struct {
 	UpdatedAt       time.Time      `json:"updated_at"`
 	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
 
+	// V2 Equipment Fields
+	HireDurationType   string     `gorm:"type:varchar(20)" json:"hire_duration_type,omitempty"` // hourly, daily, weekly, monthly
+	EstimatedHours     *int       `json:"estimated_hours,omitempty"`
+	OperatorPreference string     `gorm:"type:varchar(20)" json:"operator_preference,omitempty"` // required, preferred, not_needed
+	RequiredCapacityID *uuid.UUID `gorm:"type:uuid" json:"required_capacity_id,omitempty"`
+
 	// Relationships
-	Poster        *User            `gorm:"foreignKey:PosterID" json:"poster,omitempty"`
-	Attachments   []TaskAttachment `gorm:"foreignKey:TaskID" json:"attachments,omitempty"`
-	Offers        []Offer          `gorm:"foreignKey:TaskID" json:"offers,omitempty"`
-	AcceptedOffer *Offer           `gorm:"foreignKey:AcceptedOfferID" json:"accepted_offer,omitempty"`
+	Poster           *User              `gorm:"foreignKey:PosterID" json:"poster,omitempty"`
+	Attachments      []TaskAttachment   `gorm:"foreignKey:TaskID" json:"attachments,omitempty"`
+	Offers           []Offer            `gorm:"foreignKey:TaskID" json:"offers,omitempty"`
+	AcceptedOffer    *Offer             `gorm:"foreignKey:AcceptedOfferID" json:"accepted_offer,omitempty"`
+	RequiredCapacity *EquipmentCapacity `gorm:"foreignKey:RequiredCapacityID" json:"required_capacity,omitempty"`
 }
 
 type TaskAttachment struct {

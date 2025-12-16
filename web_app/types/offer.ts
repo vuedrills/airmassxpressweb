@@ -1,5 +1,7 @@
 // Offer types
 export type OfferStatus = 'pending' | 'accepted' | 'declined' | 'withdrawn';
+export type QuoteType = 'structured' | 'flexible';
+export type RateType = 'hourly' | 'daily' | 'weekly';
 
 export interface Offer {
     id: string;
@@ -25,4 +27,13 @@ export interface Offer {
     acceptedAt?: string;
     declinedAt?: string;
     withdrawnAt?: string;
+
+    // V2 Equipment Quote Fields
+    quoteType?: QuoteType;
+    rateType?: RateType;
+    baseRate?: number;
+    deliveryFee?: number;
+    operatorFee?: number;
+    includesOperator?: boolean;
+    inventoryId?: string;
 }
