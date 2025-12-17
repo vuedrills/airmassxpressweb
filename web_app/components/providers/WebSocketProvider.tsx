@@ -45,7 +45,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         // Assuming backend runs on distinct port 8080 in dev, or same host in prod via proxy
         // Just use NEXT_PUBLIC_API_URL base but replace http with ws
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
-        const wsUrl = apiUrl.replace(/^http/, 'ws') + '/ws?user_id=' + loggedInUser.id;
+        const token = localStorage.getItem('access_token');
+        const wsUrl = apiUrl.replace(/^http/, 'ws') + '/ws?user_id=' + loggedInUser.id + '&token=' + (token || '');
 
         console.log(`🔌 Connecting to WebSocket at ${wsUrl}`);
         const ws = new WebSocket(wsUrl);
