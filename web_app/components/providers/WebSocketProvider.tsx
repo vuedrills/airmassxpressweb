@@ -46,9 +46,18 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         // Just use NEXT_PUBLIC_API_URL base but replace http with ws
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
         const token = localStorage.getItem('access_token');
-        const wsUrl = apiUrl.replace(/^http/, 'ws') + '/ws?user_id=' + loggedInUser.id + '&token=' + (token || '');
 
-        console.log(`🔌 Connecting to WebSocket at ${wsUrl}`);
+        if (!token) {
+            console.warn('⚠️ WebSocket: User logged in but no access token found. Signaling logout...');
+            // Optional: You could trigger logout here if this state is invalid
+            // useStore.getState().logout(); 
+            isConnectingRef.current = false;
+            return;
+        }
+
+        const wsUrl = apiUrl.replace(/^http/, 'ws') + '/ws?user_id=' + loggedInUser.id + '&token=' + token;
+
+        console.log(`🔌 Connecting to WebSocket at ${wsUrl.replace(token, 'REDACTED')}`);
         const ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {
@@ -59,7 +68,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
             isConnectingRef.current = false;
 
             // Resubscribe to active topics
+            // We need to delay slightly to ensure backend is ready? No, onopen is fine.
             activeTopicsRef.current.forEach(topic => {
+                console.log(`🔄 Re-subscribing to ${topic}`);
                 ws.send(JSON.stringify({ type: 'subscribe', topic }));
             });
         };
