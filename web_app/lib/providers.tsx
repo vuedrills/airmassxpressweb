@@ -17,10 +17,11 @@ export function Providers({ children }: { children: ReactNode }) {
             })
     );
 
-    <QueryClientProvider client={queryClient}>
-        <WebSocketProvider>
-            {children}
-        </WebSocketProvider>
-    </QueryClientProvider>
+    return (
+        <QueryClientProvider client={queryClient}>
+            <WebSocketProvider>
+                {children}
+            </WebSocketProvider>
+        </QueryClientProvider>
     );
 }
