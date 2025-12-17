@@ -1,20 +1,23 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/airmassxpress/backend/internal/models"
+	"github.com/airmassxpress/backend/internal/services"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type CommentHandler struct {
-	db *gorm.DB
+	db  *gorm.DB
+	hub *services.Hub
 }
 
-func NewCommentHandler(db *gorm.DB) *CommentHandler {
-	return &CommentHandler{db: db}
+func NewCommentHandler(db *gorm.DB, hub *services.Hub) *CommentHandler {
+	return &CommentHandler{db: db, hub: hub}
 }
 
 // GetTaskQuestions fetches top-level comments (questions) for a task with their nested replies
@@ -84,6 +87,14 @@ func (h *CommentHandler) CreateQuestion(c *gin.Context) {
 	// Fetch loaded comment to return
 	h.db.Preload("User").First(&comment, comment.ID)
 
+	// BroadCast to Task Room
+	// "task_updates:{taskID}"
+	log.Printf("Broadcasting new_question to task room: task_updates:%s", taskID.String())
+	h.hub.BroadcastToRoom("task_updates:"+taskID.String(), map[string]interface{}{
+		"type":    "question_created",
+		"comment": comment,
+	})
+
 	c.JSON(http.StatusCreated, comment)
 }
 
@@ -125,6 +136,12 @@ func (h *CommentHandler) ReplyComment(c *gin.Context) {
 
 	// Fetch loaded comment
 	h.db.Preload("User").First(&comment, comment.ID)
+
+	// BroadCast to Task Room
+	h.hub.BroadcastToRoom("task_updates:"+parent.TaskID.String(), map[string]interface{}{
+		"type":    "reply_created",
+		"comment": comment,
+	})
 
 	c.JSON(http.StatusCreated, comment)
 }

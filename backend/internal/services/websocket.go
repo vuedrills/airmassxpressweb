@@ -46,8 +46,14 @@ type Hub struct {
 	// User ID to Clients map for targeted broadcast
 	userClients map[uuid.UUID][]*Client
 
+	// Rooms map: RoomID -> Set of Clients
+	rooms map[string]map[*Client]bool
+
 	// Inbound messages from the clients.
 	broadcast chan []byte
+
+	// Broadcast to specific room
+	broadcastRoom chan RoomMessage
 
 	// Register requests from the clients.
 	register chan *Client
@@ -55,16 +61,34 @@ type Hub struct {
 	// Unregister requests from clients.
 	unregister chan *Client
 
+	// Subscription requests
+	subscribe   chan Subscription
+	unsubscribe chan Subscription
+
 	mu sync.RWMutex
+}
+
+type RoomMessage struct {
+	RoomID  string
+	Message []byte
+}
+
+type Subscription struct {
+	Client *Client
+	RoomID string
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		broadcast:   make(chan []byte),
-		register:    make(chan *Client),
-		unregister:  make(chan *Client),
-		clients:     make(map[*Client]bool),
-		userClients: make(map[uuid.UUID][]*Client),
+		broadcast:     make(chan []byte),
+		broadcastRoom: make(chan RoomMessage),
+		register:      make(chan *Client),
+		unregister:    make(chan *Client),
+		subscribe:     make(chan Subscription),
+		unsubscribe:   make(chan Subscription),
+		clients:       make(map[*Client]bool),
+		userClients:   make(map[uuid.UUID][]*Client),
+		rooms:         make(map[string]map[*Client]bool),
 	}
 }
 
@@ -77,10 +101,12 @@ func (h *Hub) Run() {
 			h.userClients[client.userID] = append(h.userClients[client.userID], client)
 			h.mu.Unlock()
 		case client := <-h.unregister:
+			// Unregister from everything
 			h.mu.Lock()
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
+
 				// Remove from userClients
 				clients := h.userClients[client.userID]
 				for i, c := range clients {
@@ -89,13 +115,42 @@ func (h *Hub) Run() {
 						break
 					}
 				}
-				// Clean up empty Keys
 				if len(h.userClients[client.userID]) == 0 {
 					delete(h.userClients, client.userID)
 				}
+
+				// Remove from all rooms
+				for roomID, clients := range h.rooms {
+					if _, inRoom := clients[client]; inRoom {
+						delete(clients, client)
+						if len(clients) == 0 {
+							delete(h.rooms, roomID)
+						}
+					}
+				}
 			}
 			h.mu.Unlock()
+
+		case sub := <-h.subscribe:
+			h.mu.Lock()
+			if h.rooms[sub.RoomID] == nil {
+				h.rooms[sub.RoomID] = make(map[*Client]bool)
+			}
+			h.rooms[sub.RoomID][sub.Client] = true
+			h.mu.Unlock()
+
+		case sub := <-h.unsubscribe:
+			h.mu.Lock()
+			if clients, ok := h.rooms[sub.RoomID]; ok {
+				delete(clients, sub.Client)
+				if len(clients) == 0 {
+					delete(h.rooms, sub.RoomID)
+				}
+			}
+			h.mu.Unlock()
+
 		case message := <-h.broadcast:
+			// GLOBAL Broadcast (use sparingly)
 			h.mu.RLock()
 			for client := range h.clients {
 				select {
@@ -106,8 +161,47 @@ func (h *Hub) Run() {
 				}
 			}
 			h.mu.RUnlock()
+
+		case roomMsg := <-h.broadcastRoom:
+			// Targeted Room Broadcast
+			h.mu.RLock()
+			if clients, ok := h.rooms[roomMsg.RoomID]; ok {
+				for client := range clients {
+					select {
+					case client.send <- roomMsg.Message:
+					default:
+						// If channel is full, we assume slow reader or disconnection
+						// Should we close? Maybe not just for a room message fail.
+						// But for robustness, we skip.
+					}
+				}
+			}
+			h.mu.RUnlock()
 		}
 	}
+}
+
+// BroadcastToRoom sends a message to a specific room/topic
+func (h *Hub) BroadcastToRoom(roomID string, message interface{}) {
+	jsonMsg, err := json.Marshal(message)
+	if err != nil {
+		log.Println("Error marshalling room message:", err)
+		return
+	}
+	h.broadcastRoom <- RoomMessage{
+		RoomID:  roomID,
+		Message: jsonMsg,
+	}
+}
+
+// SubscribeClient safely subscribes a client to a room
+func (h *Hub) SubscribeClient(client *Client, roomID string) {
+	h.subscribe <- Subscription{Client: client, RoomID: roomID}
+}
+
+// UnsubscribeClient safely unsubscribes a client from a room
+func (h *Hub) UnsubscribeClient(client *Client, roomID string) {
+	h.unsubscribe <- Subscription{Client: client, RoomID: roomID}
 }
 
 // SendToUser sends a message to a specific user
@@ -157,13 +251,30 @@ func (c *Client) readPump() {
 			break
 		}
 
-		// Handle ping messages from frontend
+		// Handle JSON messages
 		var msg map[string]interface{}
 		if err := json.Unmarshal(message, &msg); err == nil {
-			if msgType, ok := msg["type"].(string); ok && msgType == "ping" {
-				// Respond with pong
+			msgType, _ := msg["type"].(string)
+
+			if msgType == "ping" {
 				pongMsg, _ := json.Marshal(map[string]string{"type": "pong"})
 				c.send <- pongMsg
+				continue
+			}
+
+			if msgType == "subscribe" {
+				if topic, ok := msg["topic"].(string); ok && topic != "" {
+					c.hub.SubscribeClient(c, topic)
+					log.Printf("Client %s subscribed to %s", c.userID, topic)
+				}
+				continue
+			}
+
+			if msgType == "unsubscribe" {
+				if topic, ok := msg["topic"].(string); ok && topic != "" {
+					c.hub.UnsubscribeClient(c, topic)
+					log.Printf("Client %s unsubscribed from %s", c.userID, topic)
+				}
 				continue
 			}
 		}

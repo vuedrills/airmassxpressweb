@@ -17,6 +17,7 @@ import { useStore } from '@/store/useStore';
 import { Header } from '@/components/Layout/Header';
 import { GoogleMapsLoader } from '@/components/GoogleMapsLoader';
 import TaskProgressCard from '@/components/TaskProgressCard';
+import { useWebSocket } from '@/components/providers/WebSocketProvider';
 
 // Reuse TaskMap for now, can create EquipmentMap if markers need distinction
 const TaskMap = dynamic(() => import('@/components/Map/TaskMap'), { ssr: false });
@@ -34,10 +35,30 @@ export default function EquipmentPageContent() {
     const dismissCurrentNotification = useStore((state) => state.dismissCurrentNotification);
 
     // Fetch EQUIPMENT tasks
-    const { data: allTasks, isLoading } = useQuery({
+    const { data: allTasks, isLoading, refetch } = useQuery({
         queryKey: ['equipmentTasks'],
         queryFn: () => fetchTasks({ taskType: 'equipment' }),
     });
+
+    // Real-time updates
+    const { subscribe, unsubscribe } = useWebSocket();
+
+    useEffect(() => {
+        const handleTaskUpdate = (data: any) => {
+            if (data.type === 'task_created') {
+                // Determine if we should show a notification or just refresh
+                // For now, just refresh the list.
+                // Optimally we'd check if data.task.taskType === 'equipment', but refetching is cheap enough
+                console.log('⚡ New task created, refreshing equipment list...');
+                refetch();
+            }
+        };
+
+        subscribe('browse_tasks', handleTaskUpdate);
+        return () => {
+            unsubscribe('browse_tasks', handleTaskUpdate);
+        };
+    }, [subscribe, unsubscribe, refetch]);
 
     // Simple filters (Search only Eqiupment tasks for now)
     const [searchQuery, setSearchQuery] = useState('');

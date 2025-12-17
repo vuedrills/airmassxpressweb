@@ -19,6 +19,7 @@ import { useStore } from '@/store/useStore';
 import { Header } from '@/components/Layout/Header';
 import TaskProgressCard from '@/components/TaskProgressCard';
 import { GoogleMapsLoader } from '@/components/GoogleMapsLoader';
+import { useWebSocket } from '@/components/providers/WebSocketProvider';
 
 // Dynamically import map to avoid SSR issues
 const TaskMap = dynamic(() => import('@/components/Map/TaskMap'), { ssr: false });
@@ -56,10 +57,32 @@ export default function BrowsePage() {
     const dismissCurrentNotification = useStore((state) => state.dismissCurrentNotification);
 
     // Fetch all tasks
-    const { data: allTasks, isLoading } = useQuery({
+    const { data: allTasks, isLoading, refetch } = useQuery({
         queryKey: ['tasks'],
         queryFn: () => fetchTasks({}),
     });
+
+    // Real-time updates
+    const { subscribe, unsubscribe } = useWebSocket();
+
+    useEffect(() => {
+        const handleTaskUpdate = (data: any) => {
+            if (data.type === 'task_created') {
+                // Determine if we should show a notification or just refresh
+                // For now, just refresh the list
+                console.log('⚡ New task created, refreshing list...');
+                refetch();
+
+                // Optional: Show notification
+                // useStore.getState().setNotification({ ... })
+            }
+        };
+
+        subscribe('browse_tasks', handleTaskUpdate);
+        return () => {
+            unsubscribe('browse_tasks', handleTaskUpdate);
+        };
+    }, [subscribe, unsubscribe, refetch]);
 
     const { data: categories } = useQuery({
         queryKey: ['categories'],

@@ -17,10 +17,11 @@ type OfferHandler struct {
 	cfg *config.Config
 	db  *gorm.DB
 	fcm *services.FCMService
+	hub *services.Hub
 }
 
-func NewOfferHandler(cfg *config.Config, db *gorm.DB, fcm *services.FCMService) *OfferHandler {
-	return &OfferHandler{cfg: cfg, db: db, fcm: fcm}
+func NewOfferHandler(cfg *config.Config, db *gorm.DB, fcm *services.FCMService, hub *services.Hub) *OfferHandler {
+	return &OfferHandler{cfg: cfg, db: db, fcm: fcm, hub: hub}
 }
 
 type CreateOfferRequest struct {
@@ -155,6 +156,12 @@ func (h *OfferHandler) CreateOffer(c *gin.Context) {
 
 	// Reload with relationships
 	h.db.Preload("Tasker").First(&offer, "id = ?", offer.ID)
+
+	// Broadcast to Task Room
+	h.hub.BroadcastToRoom("task_updates:"+taskID.String(), map[string]interface{}{
+		"type":  "offer_created",
+		"offer": offer,
+	})
 
 	c.JSON(http.StatusCreated, offer)
 }

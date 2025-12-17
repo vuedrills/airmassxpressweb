@@ -21,6 +21,7 @@ import { getAvatarSrc } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 import { Task, Message } from '@/types';
 import { TaskQuestionsTab } from './TaskQuestionsTab';
+import { useWebSocket } from '@/components/providers/WebSocketProvider';
 
 interface TaskDetailTabsProps {
     task: Task;
@@ -83,6 +84,39 @@ export default function TaskDetailTabs({ task }: TaskDetailTabsProps) {
         queryKey: ['questions', task.id],
         queryFn: () => fetchTaskQuestions(task.id),
     });
+
+    // Real-time Updates
+    const { subscribe, unsubscribe } = useWebSocket();
+
+    useEffect(() => {
+        if (!task.id) return;
+
+        const handleUpdate = (data: any) => {
+            console.log('⚡ WebSocket Update:', data.type);
+            switch (data.type) {
+                case 'question_created':
+                case 'reply_created':
+                    refetchQuestions();
+                    break;
+                case 'offer_created':
+                case 'offer_updated':
+                    queryClient.invalidateQueries({ queryKey: ['offers', task.id] });
+                    break;
+                case 'task_updated':
+                    queryClient.invalidateQueries({ queryKey: ['task', task.id] });
+                    // Also refresh offers in case status changed impacting offers
+                    queryClient.invalidateQueries({ queryKey: ['offers', task.id] });
+                    break;
+            }
+        };
+
+        const topic = `task_updates:${task.id}`;
+        subscribe(topic, handleUpdate);
+
+        return () => {
+            unsubscribe(topic, handleUpdate);
+        };
+    }, [task.id, subscribe, unsubscribe, refetchQuestions, queryClient]);
 
     // Chat Logic
     const conversationId = (task as any).conversationId || (task.acceptedOffer as any)?.conversationId; // Fallback

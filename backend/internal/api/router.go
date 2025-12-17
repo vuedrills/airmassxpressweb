@@ -22,13 +22,13 @@ func SetupRouter(cfg *config.Config, db *gorm.DB, fcm *services.FCMService, hub 
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(cfg, db)
-	taskHandler := handlers.NewTaskHandler(db, fcm)
-	offerHandler := handlers.NewOfferHandler(cfg, db, fcm)
+	taskHandler := handlers.NewTaskHandler(db, fcm, hub)
+	offerHandler := handlers.NewOfferHandler(cfg, db, fcm, hub)
 	notificationHandler := handlers.NewNotificationHandler(db)
 	userHandler := handlers.NewUserHandler(db)
 	taskerHandler := handlers.NewTaskerHandler(cfg, db)
 	chatHandler := handlers.NewChatHandler(db, hub)
-	commentHandler := handlers.NewCommentHandler(db)
+	commentHandler := handlers.NewCommentHandler(db, hub)
 	equipmentCapacityHandler := handlers.NewEquipmentCapacityHandler(db)
 
 	// Public routes

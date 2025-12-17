@@ -14,12 +14,14 @@ import (
 type TaskHandler struct {
 	db  *gorm.DB
 	fcm *services.FCMService
+	hub *services.Hub
 }
 
-func NewTaskHandler(db *gorm.DB, fcm *services.FCMService) *TaskHandler {
+func NewTaskHandler(db *gorm.DB, fcm *services.FCMService, hub *services.Hub) *TaskHandler {
 	return &TaskHandler{
 		db:  db,
 		fcm: fcm,
+		hub: hub,
 	}
 }
 
@@ -200,6 +202,13 @@ func (h *TaskHandler) CreateTask(c *gin.Context) {
 	// Reload with relationships
 	h.db.Preload("Poster").First(&task, "id = ?", task.ID)
 
+	// Broadcast to Browse Tasks Room
+	// Subscribers to 'browse_tasks' will get this update
+	h.hub.BroadcastToRoom("browse_tasks", map[string]interface{}{
+		"type": "task_created",
+		"task": task,
+	})
+
 	c.JSON(http.StatusCreated, gin.H{"taskId": task.ID})
 }
 
@@ -277,6 +286,12 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update task"})
 		return
 	}
+
+	// Broadcast update
+	h.hub.BroadcastToRoom("task_updates:"+taskID.String(), map[string]interface{}{
+		"type": "task_updated",
+		"task": task,
+	})
 
 	c.JSON(http.StatusOK, task)
 }
