@@ -181,7 +181,14 @@ func (h *TaskerHandler) UpdateProfile(c *gin.Context) {
 		// Log error but continue as profile is saved
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Profile updated", "profile": profile})
+	// Return updated user with tasker profile to keep frontend in sync (avatar_url included)
+	var user models.User
+	if err := h.db.Preload("TaskerProfile").First(&user, "id = ?", userID).Error; err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "Profile updated", "profile": profile})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Profile updated", "profile": profile, "user": user})
 }
 
 type UploadMetadataRequest struct {
@@ -238,7 +245,14 @@ func (h *TaskerHandler) UploadMetadata(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "File metadata saved", "profile": profile})
+	// Return updated user with tasker profile to keep frontend in sync (avatar_url included)
+	var user models.User
+	if err := h.db.Preload("TaskerProfile").First(&user, "id = ?", userID).Error; err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "File metadata saved", "profile": profile})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "File metadata saved", "profile": profile, "user": user})
 }
 
 // ApproveTasker simulates admin approval for local dev

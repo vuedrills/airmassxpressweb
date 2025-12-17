@@ -53,8 +53,16 @@ export interface Task {
     // V2 Equipment Fields
     hireDurationType?: HireDurationType;
     estimatedHours?: number;
+    estimatedDuration?: number; // Generic count for days/weeks/months
+    fuelIncluded?: boolean;
     operatorPreference?: OperatorPreference;
     requiredCapacityId?: string;
+
+    // Location V2
+    city?: string;
+    suburb?: string;
+    addressDetails?: string;
+    locationConfSource?: string;
 }
 
 export interface Category {

@@ -24,6 +24,11 @@ const MAX_CACHE_SIZE = 50;
  * Good Zimbabwe/Africa coverage
  * Rate: ~1-5 req/sec recommended
  */
+/**
+ * Photon Autocomplete (FREE - OpenStreetMap based)
+ * Good Zimbabwe/Africa coverage
+ * Rate: ~1-5 req/sec recommended
+ */
 export async function searchPlaces(query: string): Promise<PlaceResult[]> {
     if (!query || query.length < 3) return [];
 
@@ -33,8 +38,39 @@ export async function searchPlaces(query: string): Promise<PlaceResult[]> {
         return autocompleteCache.get(cacheKey)!;
     }
 
+    const apiKey = process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY;
+
+    // 1. Try LocationIQ First (if key exists) - Better for strict country filtering
+    if (apiKey) {
+        try {
+            const response = await fetch(
+                `https://api.locationiq.com/v1/autocomplete?key=${apiKey}&q=${encodeURIComponent(query)}&limit=5&countrycodes=zw`
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                const results: PlaceResult[] = data.map((item: any) => ({
+                    label: item.display_name,
+                    displayName: item.address?.name || item.display_name.split(',')[0],
+                    lat: parseFloat(item.lat),
+                    lng: parseFloat(item.lon),
+                    city: item.address?.city || item.address?.town || item.address?.village || item.address?.state_district,
+                    country: item.address?.country
+                }));
+
+                // Cache and return
+                addToCache(cacheKey, results);
+                return results;
+            }
+        } catch (e) {
+            console.warn('LocationIQ autocomplete failed, falling back to Photon', e);
+        }
+    }
+
+    // 2. Fallback to Photon (OpenStreetMap)
     try {
-        // Bias towards Zimbabwe (Harare coordinates)
+        // Bias towards Zimbabwe (Harare coordinates) and append " Zimbabwe" to context if needed? 
+        // Photon doesn't strictly filter countrycodes in public API, but bias helps.
         const response = await fetch(
             `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&lat=-17.8252&lon=31.0335`
         );
@@ -46,7 +82,13 @@ export async function searchPlaces(query: string): Promise<PlaceResult[]> {
 
         const data = await response.json();
 
-        const results: PlaceResult[] = (data.features || []).map((feature: any) => {
+        const results: PlaceResult[] = (data.features || [])
+            .filter((feature: any) => {
+                // Client-side filter for Zimbabwe if possible, but keep it loose if unknown
+                const country = feature.properties?.country;
+                return !country || country.toLowerCase() === 'zimbabwe';
+            })
+            .map((feature: any) => {
             const props = feature.properties || {};
             const coords = feature.geometry?.coordinates || [0, 0];
 
@@ -70,17 +112,21 @@ export async function searchPlaces(query: string): Promise<PlaceResult[]> {
         });
 
         // Cache the results
-        if (autocompleteCache.size >= MAX_CACHE_SIZE) {
-            const firstKey = autocompleteCache.keys().next().value;
-            if (firstKey) autocompleteCache.delete(firstKey);
-        }
-        autocompleteCache.set(cacheKey, results);
+        addToCache(cacheKey, results);
 
         return results;
     } catch (error) {
         console.error('Photon search error:', error);
         return [];
     }
+}
+
+function addToCache(key: string, results: PlaceResult[]) {
+    if (autocompleteCache.size >= MAX_CACHE_SIZE) {
+        const firstKey = autocompleteCache.keys().next().value;
+        if (firstKey) autocompleteCache.delete(firstKey);
+    }
+    autocompleteCache.set(key, results);
 }
 
 /**

@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { supabase } from '@/lib/supabase';
 import { FileUpload } from '@/components/FileUpload';
 import { Loader2, X, FileText } from 'lucide-react';
 
@@ -34,12 +33,19 @@ export function QuestionImageUpload({
             for (const file of files) {
                 // simple name sanitization
                 const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-                const storageRef = ref(storage, `${pathPrefix}/${filename}`);
+                const path = `${pathPrefix}/${filename}`;
 
-                await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(storageRef);
+                const { error } = await supabase.storage
+                    .from('uploads')
+                    .upload(path, file);
 
-                uploadedUrls.push(url);
+                if (error) throw error;
+
+                const { data } = supabase.storage
+                    .from('uploads')
+                    .getPublicUrl(path);
+
+                uploadedUrls.push(data.publicUrl);
             }
             onUploadComplete(uploadedUrls);
         } catch (error) {

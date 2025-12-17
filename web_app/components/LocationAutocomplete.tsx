@@ -6,7 +6,7 @@ import { searchPlaces, PlaceResult } from '@/lib/geocoding';
 
 interface LocationAutocompleteProps {
     value: string;
-    onChange: (location: string, coordinates?: { lat: number; lng: number }) => void;
+    onChange: (location: string, coordinates?: { lat: number; lng: number }, place?: PlaceResult) => void;
     placeholder?: string;
     className?: string;
 }
@@ -76,18 +76,22 @@ export function LocationAutocomplete({
         if (debounceRef.current) {
             clearTimeout(debounceRef.current);
         }
+
+
         debounceRef.current = setTimeout(() => {
             doSearch(newValue);
-        }, 400);
+        }, 300);
     };
 
     const handleSelect = (place: PlaceResult) => {
-        setInputValue(place.label);
+        // Use displayName for cleaner input (e.g. "Avondale" instead of "Avondale, Harare...")
+        const cleanName = place.displayName || place.label.split(',')[0];
+        setInputValue(cleanName);
         setSuggestions([]);
         setIsOpen(false);
 
-        // Pass both label and coordinates to parent
-        onChange(place.label, { lat: place.lat, lng: place.lng });
+        // Pass label, coordinates, and full details to parent
+        onChange(cleanName, { lat: place.lat, lng: place.lng }, place);
     };
 
     return (

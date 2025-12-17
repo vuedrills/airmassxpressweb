@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Calendar, ArrowLeft, MessageCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { getAvatarSrc, formatRelativeTime } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { Task } from '@/types';
 import TaskDetailTabs from '@/components/TaskDetailTabs';
@@ -356,7 +357,7 @@ export default function BrowsePage() {
                                                                 className="flex-shrink-0"
                                                             >
                                                                 <img
-                                                                    src={selectedTask.poster?.avatar_url || selectedTask.poster?.avatar || '/avatars/user.png'}
+                                                                    src={getAvatarSrc(selectedTask.poster)}
                                                                     alt={selectedTask.poster?.name}
                                                                     onError={(e) => {
                                                                         e.currentTarget.src = '/avatars/user.png';
@@ -367,7 +368,9 @@ export default function BrowsePage() {
                                                             </Link>
                                                             <div>
                                                                 <div className="font-semibold text-sm">{selectedTask.poster?.name}</div>
-                                                                <div className="text-xs text-gray-500">about 11 hours ago</div>
+                                                                <div className="text-xs text-gray-500">
+                                                                    {formatRelativeTime(selectedTask.createdAt || (selectedTask as any).created_at)}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>

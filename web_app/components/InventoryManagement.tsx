@@ -13,9 +13,7 @@ import Link from 'next/link';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { FileUpload } from '@/components/FileUpload';
 import type { EquipmentCapacity } from '@/types';
-import { storage, auth } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { signInAnonymously } from 'firebase/auth';
+import { supabase } from '@/lib/supabase';
 
 // Predefined categories matching prompt
 import { EQUIPMENT_CATEGORIES } from '@/lib/constants';
@@ -118,16 +116,24 @@ export default function InventoryManagement() {
         if (selectedFiles.length === 0) return;
         setIsUploading(true);
         try {
-            // Sign in anonymously for Firebase upload
-            await signInAnonymously(auth);
-
             const uploadedUrls: string[] = [];
             for (const file of selectedFiles) {
                 const timestamp = Date.now();
-                const storageRef = ref(storage, `inventory/${timestamp}-${file.name}`);
-                const snapshot = await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(snapshot.ref);
-                uploadedUrls.push(url);
+                // Sanitize filename
+                const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                const path = `inventory/${timestamp}-${sanitizedName}`;
+
+                const { data, error } = await supabase.storage
+                    .from('uploads')
+                    .upload(path, file);
+
+                if (error) throw error;
+
+                const { data: publicUrlData } = supabase.storage
+                    .from('uploads')
+                    .getPublicUrl(path);
+
+                uploadedUrls.push(publicUrlData.publicUrl);
             }
             setNewItem({ ...newItem, photos: uploadedUrls });
             alert(`${uploadedUrls.length} photos uploaded successfully!`);

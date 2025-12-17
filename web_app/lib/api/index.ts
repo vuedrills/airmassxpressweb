@@ -21,10 +21,14 @@ const setRefreshToken = (token: string) => {
     }
 };
 
+import { useStore } from '@/store/useStore';
+
 const clearTokens = () => {
     if (typeof window !== 'undefined') {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        // Clear Zustand store to prevent infinite loop on rehydration
+        useStore.getState().logout();
     }
 };
 
@@ -70,12 +74,26 @@ export async function apiFetch<T = any>(endpoint: string, options: RequestInit =
                         headers,
                     });
                     return retryResponse.json();
+                } else {
+                    // Refresh failed (e.g. refresh token expired)
+                    clearTokens();
+                    if (typeof window !== 'undefined') {
+                        window.location.href = '/login';
+                    }
+                    throw new Error('Session expired');
                 }
             } catch (error) {
                 clearTokens();
                 if (typeof window !== 'undefined') {
                     window.location.href = '/login';
                 }
+                throw error;
+            }
+        } else {
+            // No refresh token available
+            clearTokens();
+            if (typeof window !== 'undefined') {
+                window.location.href = '/login';
             }
         }
     }
@@ -104,7 +122,7 @@ function mapBackendUser(data: any): User {
         tasksCompleted: data.tasks_completed ?? data.tasksCompleted,
         memberSince: data.member_since ?? data.memberSince,
         lastActivityAt: safeDate(data.last_activity_at ?? data.lastActivityAt),
-        avatar: data.avatar_url ?? data.avatar, // Map backend snake_case to frontend
+        avatar: data.avatar_url ?? data.avatar ?? data.profile_picture_url, // Map backend snake_case to frontend
         // Tasker specific mapping
         isTasker: data.is_tasker,
         role: data.is_tasker ? 'tasker' : 'user',
@@ -375,14 +393,22 @@ export async function fetchTasks(filters?: {
         timeOfDay: task.time_of_day,
         dateType: task.date_type,
         taskType: task.task_type,
+        // Equipment-specific fields
+        hireDurationType: task.hire_duration_type,
+        estimatedHours: task.estimated_hours,
+        estimatedDuration: task.estimated_duration,
+        fuelIncluded: task.fuel_included,
+        operatorPreference: task.operator_preference,
+        requiredCapacityId: task.required_capacity_id,
+        offerCount: task.offer_count,
         // Map attachment URLs to use backend base URL
         attachments: task.attachments?.map((att: any) => ({
             ...att,
-            url: att.url.startsWith('http') ? att.url : `${API_BASE_URL.replace('/api/v1', '')}${att.url}`
+            url: att.url?.startsWith('http') ? att.url : `${API_BASE_URL.replace('/api/v1', '')}${att.url}`
         })),
         images: task.attachments
-            ?.filter((att: any) => att.type === 'image' || att.type.startsWith('image/'))
-            .map((att: any) => att.url.startsWith('http') ? att.url : `${API_BASE_URL.replace('/api/v1', '')}${att.url}`) || []
+            ?.filter((att: any) => att.type === 'image' || att.type?.startsWith('image/'))
+            .map((att: any) => att.url?.startsWith('http') ? att.url : `${API_BASE_URL.replace('/api/v1', '')}${att.url}`) || []
     }));
 }
 
@@ -401,7 +427,11 @@ export async function fetchTaskById(id: string): Promise<Task | null> {
             timeOfDay: task.time_of_day,
             dateType: task.date_type,
             posterId: task.poster_id, // Map backend snake_case to frontend
-            // Map attachment URLs to use backend base URL
+            // Equipment-specific fields
+            hireDurationType: task.hire_duration_type,
+            estimatedHours: task.estimated_hours,
+            operatorPreference: task.operator_preference,
+            requiredCapacityId: task.required_capacity_id,
             // Map poster
             poster: task.poster ? mapBackendUser(task.poster) : undefined,
             // Map offers and their taskers
@@ -415,15 +445,16 @@ export async function fetchTaskById(id: string): Promise<Task | null> {
                 taskerId: task.accepted_offer.tasker_id,
                 amount: task.accepted_offer.amount,
                 conversationId: task.conversation_id,
+                tasker: task.accepted_offer.tasker ? mapBackendUser(task.accepted_offer.tasker) : undefined,
             } : undefined,
             // Map attachment URLs to use backend base URL
             attachments: task.attachments?.map((att: any) => ({
                 ...att,
-                url: att.url.startsWith('http') ? att.url : `${API_BASE_URL.replace('/api/v1', '')}${att.url}`
+                url: att.url?.startsWith('http') ? att.url : `${API_BASE_URL.replace('/api/v1', '')}${att.url}`
             })),
             images: task.attachments
-                ?.filter((att: any) => att.type === 'image' || att.type.startsWith('image/'))
-                .map((att: any) => att.url.startsWith('http') ? att.url : `${API_BASE_URL.replace('/api/v1', '')}${att.url}`) || []
+                ?.filter((att: any) => att.type === 'image' || att.type?.startsWith('image/'))
+                .map((att: any) => att.url?.startsWith('http') ? att.url : `${API_BASE_URL.replace('/api/v1', '')}${att.url}`) || []
         };
     } catch (error) {
         return null;
@@ -450,6 +481,11 @@ export async function createTask(taskData: Partial<Task>): Promise<{ taskId: str
     if (taskData.estimatedHours) payload.estimated_hours = taskData.estimatedHours;
     if (taskData.operatorPreference) payload.operator_preference = taskData.operatorPreference;
     if (taskData.requiredCapacityId) payload.required_capacity_id = taskData.requiredCapacityId;
+
+    // Location V2
+    if (taskData.city) payload.city = taskData.city;
+    if (taskData.suburb) payload.suburb = taskData.suburb;
+    if (taskData.addressDetails) payload.address_details = taskData.addressDetails;
 
     return await apiFetch('/tasks', {
         method: 'POST',

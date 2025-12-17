@@ -97,7 +97,7 @@ export default function TaskProgressCard({ task, acceptedOffer, escrow, currentU
             )}
 
             {/* Accepted Tasker Info */}
-            {acceptedOffer && (
+            {acceptedOffer && acceptedOffer.tasker && (
                 <div className="bg-white/80 rounded-lg p-4 border border-blue-200">
                     <div className="text-xs text-gray-600 mb-2">ACCEPTED TASKER</div>
                     <div className="flex items-center justify-between">

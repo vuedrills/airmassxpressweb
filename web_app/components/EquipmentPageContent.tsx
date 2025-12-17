@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Search, Filter, Calendar, DollarSign, ArrowLeft, CheckCircle2, Star } from 'lucide-react';
 import Link from 'next/link';
-import { getAvatarSrc } from '@/lib/utils';
+import { getAvatarSrc, formatRelativeTime } from '@/lib/utils';
 import MakeOfferButton from '@/components/MakeOfferButton';
 import dynamic from 'next/dynamic';
 import TaskDetailTabs from '@/components/TaskDetailTabs';
@@ -16,6 +16,7 @@ import { NotificationBanner } from '@/components/NotificationBanner';
 import { useStore } from '@/store/useStore';
 import { Header } from '@/components/Layout/Header';
 import { GoogleMapsLoader } from '@/components/GoogleMapsLoader';
+import TaskProgressCard from '@/components/TaskProgressCard';
 
 // Reuse TaskMap for now, can create EquipmentMap if markers need distinction
 const TaskMap = dynamic(() => import('@/components/Map/TaskMap'), { ssr: false });
@@ -57,6 +58,56 @@ export default function EquipmentPageContent() {
     }, [allTasks, searchQuery]);
 
     const selectedTask = filteredTasks?.find((t) => t.id === selectedTaskId);
+
+    // Fetch full task details (includes attachments) when a task is selected
+    const { data: detailedTask } = useQuery({
+        queryKey: ['equipmentTaskDetail', selectedTaskId],
+        queryFn: () => selectedTaskId ? fetchTaskById(selectedTaskId) : Promise.resolve(null),
+        enabled: !!selectedTaskId,
+    });
+
+    const taskForView = detailedTask || selectedTask;
+
+    const hireDurationLabel = (task: any) => {
+        const dur = task?.hireDurationType || task?.hire_duration_type;
+        const hrs = task?.estimatedHours || task?.estimated_hours;
+        const duration = task?.estimatedDuration || task?.estimated_duration;
+
+        if (!dur) return hrs ? `${hrs} hour${hrs === 1 ? '' : 's'}` : 'Flexible';
+
+        if (dur === 'hourly') {
+            return hrs ? `${hrs} hour${hrs === 1 ? '' : 's'}` : 'Hourly';
+        }
+
+        if (duration) {
+            if (dur === 'daily') return `${duration} day${duration === 1 ? '' : 's'}`;
+            if (dur === 'weekly') return `${duration} week${duration === 1 ? '' : 's'}`;
+            if (dur === 'monthly') return `${duration} month${duration === 1 ? '' : 's'}`;
+        }
+
+        return dur; // fallback to just the type e.g. "daily"
+    };
+
+    const operatorLabel = (task: any) => {
+        const pref = task?.operatorPreference || task?.operator_preference;
+        if (pref === 'required') return '✅ Operator Required';
+        if (pref === 'preferred') return '👍 Operator Preferred';
+        if (pref === 'not_needed') return '🔧 Dry Hire (No Operator)';
+        return 'Contact Poster';
+    };
+
+    // New: derive a human friendly capacity label (returns null if not set)
+    const capacityLabel = (task: any) => {
+        const cap =
+            task?.requiredCapacityLabel ||
+            task?.required_capacity_label ||
+            task?.capacity ||
+            task?.capacity_label ||
+            (task as any).requiredCapacity?.label ||
+            (task as any).required_capacity?.label;
+        if (!cap) return null;
+        return cap;
+    };
 
     return (
         <GoogleMapsLoader>
@@ -128,7 +179,11 @@ export default function EquipmentPageContent() {
                                                 <div className="space-y-1 text-sm text-gray-600 mb-3">
                                                     <div className="flex items-center gap-2">
                                                         <MapPin className="h-4 w-4 flex-shrink-0" />
-                                                        <span className="truncate">{task.location.split(',')[0]}</span>
+                                                        <span className="truncate">
+                                                            {task.suburb && task.city
+                                                                ? `${task.suburb}, ${task.city}`
+                                                                : task.location.split(',')[0]}
+                                                        </span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <Calendar className="h-4 w-4 flex-shrink-0" />
@@ -174,7 +229,7 @@ export default function EquipmentPageContent() {
 
                             {/* Right Section - Map/Detail */}
                             <div className="md:flex-1">
-                                {selectedTask ? (
+                                {taskForView ? (
                                     <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
                                         <div className="bg-white rounded-lg border p-6">
                                             <button
@@ -185,32 +240,44 @@ export default function EquipmentPageContent() {
                                                 Return to list
                                             </button>
 
+                                            {/* Task Completion / Progress Card */}
+                                            {taskForView.status !== 'open' && (
+                                                <TaskProgressCard
+                                                    task={taskForView}
+                                                    acceptedOffer={(taskForView as any).acceptedOffer}
+                                                    currentUserId={loggedInUser?.id}
+                                                />
+                                            )}
+
                                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                                 {/* Main Content */}
                                                 <div className="lg:col-span-2">
                                                     {/* Header Badges */}
                                                     <div className="flex gap-2 mb-6 items-center">
-                                                        <span className={`inline-block text-xs uppercase font-bold px-2 py-1 rounded-md ${selectedTask.status === 'open' ? 'bg-green-100 text-green-700' :
-                                                            selectedTask.status === 'assigned' ? 'bg-blue-100 text-blue-700' :
+                                                        <span className={`inline-block text-xs uppercase font-bold px-2 py-1 rounded-md ${taskForView.status === 'open' ? 'bg-green-100 text-green-700' :
+                                                            taskForView.status === 'assigned' ? 'bg-blue-100 text-blue-700' :
                                                                 'bg-gray-100 text-gray-700'
                                                             }`}>
-                                                            {selectedTask.status}
+                                                            {taskForView.status}
                                                         </span>
-                                                        <Badge variant="outline">{selectedTask.category}</Badge>
+                                                        <Badge variant="outline">{taskForView.category}</Badge>
+                                                        <span className="text-xs text-gray-500">
+                                                            {formatRelativeTime(taskForView.createdAt || (taskForView as any).created_at)}
+                                                        </span>
                                                     </div>
 
                                                     <h1 className="font-heading text-3xl font-bold text-[#1a2847] mb-4 leading-tight" style={{ fontFamily: 'var(--font-fjalla), "Fjalla One", sans-serif' }}>
-                                                        {selectedTask.title}
+                                                        {taskForView.title}
                                                     </h1>
 
                                                     {/* Posted By Section (Matching Browse Page) */}
-                                                    {selectedTask.poster && (
+                                                    {taskForView.poster && (
                                                         <div className="mb-6 pb-6 border-b">
                                                             <div className="text-xs text-gray-600 mb-3">POSTED BY</div>
                                                             <div className="flex items-center gap-3">
                                                                 <img
-                                                                    src={getAvatarSrc(selectedTask.poster)}
-                                                                    alt={selectedTask.poster.name}
+                                                                    src={getAvatarSrc(taskForView.poster)}
+                                                                    alt={taskForView.poster.name}
                                                                     className="w-12 h-12 rounded-full object-cover hover:ring-2 hover:ring-[#1a2847] transition-all cursor-pointer"
                                                                     onError={(e) => {
                                                                         const target = e.target as HTMLImageElement;
@@ -220,12 +287,12 @@ export default function EquipmentPageContent() {
                                                                 />
                                                                 <div>
                                                                     <div className="font-semibold text-sm flex items-center gap-1">
-                                                                        {selectedTask.poster.name}
-                                                                        {selectedTask.poster.isVerified && <CheckCircle2 className="h-3 w-3 text-blue-600" />}
+                                                                        {taskForView.poster.name}
+                                                                        {taskForView.poster.isVerified && <CheckCircle2 className="h-3 w-3 text-blue-600" />}
                                                                     </div>
                                                                     <div className="flex items-center gap-1 text-xs text-gray-500">
                                                                         <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                                                                        <span>{selectedTask.poster.rating ? selectedTask.poster.rating.toFixed(1) : 'New'}</span>
+                                                                        <span>{taskForView.poster.rating ? taskForView.poster.rating.toFixed(1) : 'New'}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -236,57 +303,53 @@ export default function EquipmentPageContent() {
                                                     <div className="space-y-3 text-sm text-gray-600 mb-6">
                                                         <div className="flex items-center gap-2">
                                                             <MapPin className="h-5 w-5" />
-                                                            <span>{selectedTask.location}</span>
+                                                            {/* Display suburb, city if available, else location string */}
+                                                            <span>
+                                                                {taskForView.suburb && taskForView.city
+                                                                    ? `${taskForView.suburb}, ${taskForView.city}`
+                                                                    : taskForView.location}
+                                                            </span>
                                                             <button
                                                                 onClick={() => {
-                                                                    setMapFocusTaskId(selectedTask.id);
+                                                                    setMapFocusTaskId(taskForView.id);
                                                                     setSelectedTaskId(null);
                                                                 }}
                                                                 className="text-[#1a2847] hover:underline ml-2 bg-transparent border-none p-0 cursor-pointer font-medium"
                                                             >
-                                                                View map
+                                                                View on map
                                                             </button>
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <Calendar className="h-5 w-5" />
                                                             <span className="font-semibold text-gray-900">TO BE DONE</span>
-                                                            <span>{selectedTask.dateType === 'flexible' ? 'Flexible Date' : selectedTask.date || 'No date'}</span>
+                                                            <span>{taskForView.dateType === 'flexible' ? 'Flexible Date' : taskForView.date || 'No date'}</span>
                                                         </div>
                                                     </div>
 
                                                     {/* V2: Equipment Request Details */}
                                                     <div className="mb-6 grid grid-cols-2 md:grid-cols-3 gap-3">
-                                                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                                                            <div className="text-xs text-blue-600 font-medium mb-1">Hire Duration</div>
-                                                            <div className="font-semibold capitalize text-blue-900">
-                                                                {(selectedTask as any).hireDurationType || (selectedTask as any).hire_duration_type || 'Flexible'}
-                                                                {((selectedTask as any).estimatedHours || (selectedTask as any).estimated_hours) && (
-                                                                    <span className="text-sm font-normal ml-1">
-                                                                        ({(selectedTask as any).estimatedHours || (selectedTask as any).estimated_hours}h)
-                                                                    </span>
-                                                                )}
+                                                        <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                                            <div className="text-xs text-gray-500 font-medium mb-1 uppercase">Hire Duration</div>
+                                                            <div className="font-semibold text-gray-900 capitalize">
+                                                                {hireDurationLabel(taskForView)}
                                                             </div>
                                                         </div>
-                                                        <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
-                                                            <div className="text-xs text-amber-600 font-medium mb-1">Operator</div>
-                                                            <div className="font-semibold text-amber-900">
-                                                                {(() => {
-                                                                    const pref = (selectedTask as any).operatorPreference || (selectedTask as any).operator_preference;
-                                                                    if (pref === 'required') return '✅ Required';
-                                                                    if (pref === 'preferred') return '👍 Preferred';
-                                                                    if (pref === 'not_needed') return '🔧 Dry Hire';
-                                                                    return '📋 Contact Poster';
-                                                                })()}
+                                                        <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                                            <div className="text-xs text-gray-500 font-medium mb-1 uppercase">Operator</div>
+                                                            <div className="font-semibold text-gray-900">
+                                                                {operatorLabel(taskForView)}
                                                             </div>
                                                         </div>
-                                                        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
-                                                            <div className="text-xs text-green-600 font-medium mb-1">Capacity</div>
-                                                            <div className="font-semibold text-green-900">
-                                                                {(selectedTask as any).requiredCapacityId || (selectedTask as any).required_capacity_id
-                                                                    ? 'As Specified'
-                                                                    : 'Any Size'}
+
+                                                        {/* Render capacity only when a capacity label exists */}
+                                                        {capacityLabel(taskForView) && (
+                                                            <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                                                <div className="text-xs text-gray-500 font-medium mb-1 uppercase">Capacity</div>
+                                                                <div className="font-semibold text-gray-900">
+                                                                    {capacityLabel(taskForView)}
+                                                                </div>
                                                             </div>
-                                                        </div>
+                                                        )}
                                                     </div>
 
                                                     {/* Description */}
@@ -294,10 +357,48 @@ export default function EquipmentPageContent() {
                                                         <h3 className="font-bold text-lg text-gray-900 mb-3">Description</h3>
                                                         <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                                                             <p className="text-gray-700 whitespace-pre-wrap leading-relaxed text-sm">
-                                                                {selectedTask.description}
+                                                                {taskForView.description}
                                                             </p>
                                                         </div>
                                                     </div>
+
+                                                    {/* Attachments / Photos */}
+                                                    {taskForView.attachments && taskForView.attachments.length > 0 && (
+                                                        <div className="mb-6">
+                                                            <h3 className="font-bold text-lg text-gray-900 mb-3">Photos & Attachments</h3>
+                                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                                                {taskForView.attachments.map((att: any) => (
+                                                                    <a
+                                                                        key={att.id || att.url}
+                                                                        href={att.url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="group relative block border rounded-lg overflow-hidden hover:border-[#1a2847] transition-colors"
+                                                                    >
+                                                                        {att.type === 'image' || att.type?.startsWith('image/') ? (
+                                                                            <div className="aspect-square relative bg-gray-100">
+                                                                                <img
+                                                                                    src={att.url}
+                                                                                    alt={att.name || 'Attachment'}
+                                                                                    className="object-cover w-full h-full"
+                                                                                />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="aspect-square flex flex-col items-center justify-center bg-gray-50 p-4">
+                                                                                <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mb-2">
+                                                                                    <span className="text-2xl">📄</span>
+                                                                                </div>
+                                                                                <span className="text-xs text-center text-gray-600 truncate w-full px-2">
+                                                                                    {att.name || 'Attachment'}
+                                                                                </span>
+                                                                            </div>
+                                                                        )}
+                                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                                                                    </a>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 {/* Sidebar - Budget & Actions */}
@@ -306,10 +407,10 @@ export default function EquipmentPageContent() {
                                                         <div className="text-center mb-4">
                                                             <div className="text-xs text-gray-600 mb-1">TASK BUDGET</div>
                                                             <div className="font-heading text-4xl font-bold text-[#1a2847]" style={{ fontFamily: 'var(--font-fjalla), "Fjalla One", sans-serif' }}>
-                                                                ${selectedTask.budget}
+                                                                ${taskForView.budget}
                                                             </div>
                                                         </div>
-                                                        <MakeOfferButton taskId={selectedTask.id} task={selectedTask} variant="default" className="w-full" />
+                                                        <MakeOfferButton taskId={taskForView.id} task={taskForView} variant="default" className="w-full" />
                                                         <select className="w-full px-4 py-2 border rounded-md text-sm mt-2">
                                                             <option>More Options</option>
                                                             <option>Report this task</option>
@@ -321,7 +422,7 @@ export default function EquipmentPageContent() {
 
                                             {/* Tabs */}
                                             <div className="mt-4">
-                                                <TaskDetailTabs task={selectedTask} />
+                                                <TaskDetailTabs task={taskForView} />
                                             </div>
                                         </div>
                                     </div>

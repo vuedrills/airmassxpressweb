@@ -13,6 +13,7 @@ import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import Link from 'next/link';
+import { getAvatarSrc } from '@/lib/utils';
 
 export default function TaskDetailPage() {
     const params = useParams();
@@ -210,7 +211,7 @@ export default function TaskDetailPage() {
                                 <h3 className="font-semibold mb-4">Posted By</h3>
                                 <div className="flex items-center gap-3 mb-4">
                                     <Avatar className="h-12 w-12">
-                                        <AvatarImage src={task.poster?.avatar_url || task.poster?.avatar || '/avatars/user.png'} />
+                                        <AvatarImage src={getAvatarSrc(task.poster)} />
                                         <AvatarFallback>
                                             <img src="/avatars/user.png" alt={task.poster?.name} className="w-full h-full object-cover" />
                                         </AvatarFallback>
@@ -282,6 +283,41 @@ export default function TaskDetailPage() {
                                     Ask a Question
                                 </Button>
                             </div>
+
+                            {/* Equipment Details Card */}
+                            {task.taskType === 'equipment' && (
+                                <div className="bg-white rounded-lg border p-6">
+                                    <h3 className="font-semibold mb-4">Equipment Details</h3>
+                                    <div className="space-y-4 text-sm">
+                                        <div className="flex justify-between border-b pb-2">
+                                            <span className="text-gray-500">Duration Type</span>
+                                            <span className="font-medium capitalize">{task.hireDurationType}</span>
+                                        </div>
+                                        <div className="flex justify-between border-b pb-2">
+                                            <span className="text-gray-500">Duration</span>
+                                            <span className="font-medium">
+                                                {task.hireDurationType === 'hourly'
+                                                    ? `${task.estimatedHours || 0} Hours`
+                                                    : `${task.estimatedDuration || 0} ${task.hireDurationType === 'daily' ? 'Days' : task.hireDurationType === 'weekly' ? 'Weeks' : 'Months'}`
+                                                }
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between border-b pb-2">
+                                            <span className="text-gray-500">Operator</span>
+                                            <span className="font-medium capitalize">
+                                                {task.operatorPreference === 'required' ? '✅ Required' :
+                                                    task.operatorPreference === 'preferred' ? '👍 Preferred' : '🔧 Dry Hire'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">Fuel</span>
+                                            <span className="font-medium">
+                                                {task.fuelIncluded ? '✅ Included' : '❌ Not Included'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -35,6 +35,19 @@ type CreateTaskRequest struct {
 	Date        *string  `json:"date"`
 	TimeOfDay   string   `json:"time_of_day"`
 	TaskType    string   `json:"task_type"`
+
+	// V2 Fields
+	HireDurationType   string  `json:"hire_duration_type"`
+	EstimatedHours     *int    `json:"estimated_hours"`
+	EstimatedDuration  *int    `json:"estimated_duration"`
+	FuelIncluded       bool    `json:"fuel_included"`
+	OperatorPreference string  `json:"operator_preference"`
+	RequiredCapacityID *string `json:"required_capacity_id"`
+
+	// Location V2
+	City           string `json:"city"`
+	Suburb         string `json:"suburb"`
+	AddressDetails string `json:"address_details"`
 }
 
 func (h *TaskHandler) ListTasks(c *gin.Context) {
@@ -88,7 +101,7 @@ func (h *TaskHandler) GetTask(c *gin.Context) {
 	}
 
 	var task models.Task
-	if err := h.db.Preload("Poster").Preload("Attachments").Preload("Offers.Tasker").Preload("AcceptedOffer").First(&task, "id = ?", taskID).Error; err != nil {
+	if err := h.db.Preload("Poster").Preload("Attachments").Preload("Offers.Tasker").Preload("AcceptedOffer.Tasker").Preload("RequiredCapacity").First(&task, "id = ?", taskID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
 		return
 	}
@@ -120,20 +133,63 @@ func (h *TaskHandler) CreateTask(c *gin.Context) {
 		taskType = req.TaskType
 	}
 
+	var reqCapID *uuid.UUID
+	if req.RequiredCapacityID != nil && *req.RequiredCapacityID != "" {
+		id, err := uuid.Parse(*req.RequiredCapacityID)
+		if err == nil {
+			reqCapID = &id
+		}
+	}
+
+	// Construct Location String for backward compatibility
+	// Format: "Details, Suburb, City"
+	locationStr := req.Location
+	if req.City != "" || req.Suburb != "" {
+		parts := []string{}
+		if req.AddressDetails != "" {
+			parts = append(parts, req.AddressDetails)
+		}
+		if req.Suburb != "" {
+			parts = append(parts, req.Suburb)
+		}
+		if req.City != "" {
+			parts = append(parts, req.City)
+		}
+		if len(parts) > 0 {
+			locationStr = ""
+			for i, p := range parts {
+				if i > 0 {
+					locationStr += ", "
+				}
+				locationStr += p
+			}
+		}
+	}
+
 	task := models.Task{
-		PosterID:    userID.(uuid.UUID),
-		Title:       req.Title,
-		Description: req.Description,
-		Category:    req.Category,
-		Budget:      req.Budget,
-		Location:    req.Location,
-		Lat:         req.Lat,
-		Lng:         req.Lng,
-		DateType:    req.DateType,
-		Date:        taskDate,
-		TimeOfDay:   req.TimeOfDay,
-		Status:      "open",
-		TaskType:    taskType,
+		PosterID:           userID.(uuid.UUID),
+		Title:              req.Title,
+		Description:        req.Description,
+		Category:           req.Category,
+		Budget:             req.Budget,
+		Location:           locationStr, // Use constructed or provided location
+		Lat:                req.Lat,
+		Lng:                req.Lng,
+		DateType:           req.DateType,
+		Date:               taskDate,
+		TimeOfDay:          req.TimeOfDay,
+		Status:             "open",
+		TaskType:           taskType,
+		HireDurationType:   req.HireDurationType,
+		EstimatedHours:     req.EstimatedHours,
+		EstimatedDuration:  req.EstimatedDuration,
+		FuelIncluded:       req.FuelIncluded,
+		OperatorPreference: req.OperatorPreference,
+		RequiredCapacityID: reqCapID,
+		City:               req.City,
+		Suburb:             req.Suburb,
+		AddressDetails:     req.AddressDetails,
+		LocationConfSource: "user_confirmed_pin",
 	}
 
 	if err := h.db.Create(&task).Error; err != nil {

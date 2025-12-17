@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { supabase } from '@/lib/supabase';
 import { FileUpload } from '@/components/FileUpload';
 import { Loader2, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { uploadTaskerFileMetadata } from '@/lib/api';
@@ -37,11 +36,23 @@ export function SmartFileUpload({
         try {
             for (const file of files) {
                 // simple name sanitization
-                const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-                const storageRef = ref(storage, `${path}/${filename}`);
+                const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                const filename = `${Date.now()}-${sanitizedName}`;
+                const storagePath = `${path}/${filename}`;
 
-                await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(storageRef);
+                const { error } = await supabase.storage
+                    .from('uploads')
+                    .upload(storagePath, file);
+
+                if (error) {
+                    throw error;
+                }
+
+                const { data } = supabase.storage
+                    .from('uploads')
+                    .getPublicUrl(storagePath);
+
+                const url = data.publicUrl;
 
                 // Sync with backend metadata
                 await uploadTaskerFileMetadata(url, type);
@@ -63,16 +74,17 @@ export function SmartFileUpload({
     };
 
     const isImage = (url: string) => {
-        return /\.(jpeg|jpg|png|gif|webp)$/i.test(url) || url.includes('alt=media'); // Basic check, Firebase URLs often have alt=media
+        // Basic file extension check that works for generic public URLs
+        return /\.(jpeg|jpg|png|gif|webp)$/i.test(url);
     };
 
     const getFileName = (url: string) => {
         try {
-            // decipher filename from firebase url if possible, else generic
             const decoded = decodeURIComponent(url);
-            const parts = decoded.split('/');
+            const withoutQuery = decoded.split('?')[0];
+            const parts = withoutQuery.split('/');
             const lastPart = parts[parts.length - 1];
-            return lastPart.split('?')[0]; // remove query params
+            return lastPart || 'Uploaded File';
         } catch (e) {
             return 'Uploaded File';
         }
