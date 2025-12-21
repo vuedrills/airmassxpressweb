@@ -255,6 +255,54 @@ func (h *TaskerHandler) UploadMetadata(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "File metadata saved", "profile": profile, "user": user})
 }
 
+// GetPendingTaskers returns list of taskers waiting for review
+func (h *TaskerHandler) GetPendingTaskers(c *gin.Context) {
+	var profiles []models.TaskerProfile
+	// Fetch profiles with status 'pending_review'
+	if err := h.db.Where("status = ?", "pending_review").Find(&profiles).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch pending taskers"})
+		return
+	}
+
+	// Fetch associated users
+	var userIDs []uuid.UUID
+	for _, p := range profiles {
+		userIDs = append(userIDs, p.UserID)
+	}
+
+	var users []models.User
+	if len(userIDs) > 0 {
+		if err := h.db.Where("id IN ?", userIDs).Find(&users).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch tasker user details"})
+			return
+		}
+	}
+
+	// Combine data
+	type PendingTasker struct {
+		User    models.User          `json:"user"`
+		Profile models.TaskerProfile `json:"profile"`
+	}
+
+	// Create map for faster lookup
+	userMap := make(map[uuid.UUID]models.User)
+	for _, u := range users {
+		userMap[u.ID] = u
+	}
+
+	var result []PendingTasker
+	for _, p := range profiles {
+		if user, ok := userMap[p.UserID]; ok {
+			result = append(result, PendingTasker{
+				User:    user,
+				Profile: p,
+			})
+		}
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
 // ApproveTasker simulates admin approval for local dev
 func (h *TaskerHandler) ApproveTasker(c *gin.Context) {
 	var req struct {

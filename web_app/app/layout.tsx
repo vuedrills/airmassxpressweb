@@ -28,6 +28,8 @@ export const metadata: Metadata = {
   description: "Connect with skilled taskers for any job. From cleaning to assembly, find trusted help in your area.",
 };
 
+import { Toaster } from "@/components/ui/sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -39,6 +41,7 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <Toaster />
       </body>
     </html>
   );

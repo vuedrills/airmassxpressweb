@@ -69,6 +69,8 @@ func SetupRouter(cfg *config.Config, db *gorm.DB, fcm *services.FCMService, hub 
 		{
 			admin.POST("/approve-tasker", taskerHandler.ApproveTasker)
 			admin.POST("/verify-user", userHandler.AdminVerifyUser)
+			admin.GET("/taskers/pending", taskerHandler.GetPendingTaskers)
+			admin.GET("/users", userHandler.GetAllUsers)
 		}
 
 	}
@@ -139,9 +141,12 @@ func SetupRouter(cfg *config.Config, db *gorm.DB, fcm *services.FCMService, hub 
 		protected.POST("/reviews/:id/reply", reviewHandler.ReplyReview)
 
 		// Inventory
-		inventoryHandler := handlers.NewInventoryHandler(cfg, db)
+		supabaseService := services.NewSupabaseService(cfg)
+		inventoryHandler := handlers.NewInventoryHandler(cfg, db, supabaseService)
 		protected.GET("/inventory", inventoryHandler.GetMyInventory)
 		protected.POST("/inventory", inventoryHandler.CreateInventoryItem)
+		protected.POST("/inventory/upload", inventoryHandler.UploadImage)
+		protected.PUT("/inventory/:id", inventoryHandler.UpdateInventoryItem)
 		protected.DELETE("/inventory/:id", inventoryHandler.DeleteInventoryItem)
 	}
 

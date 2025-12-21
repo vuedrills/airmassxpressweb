@@ -24,6 +24,7 @@ Auction _$AuctionFromJson(Map<String, dynamic> json) => Auction(
   endTime: json['end_time'] == null
       ? null
       : DateTime.parse(json['end_time'] as String),
+  images: (json['images'] as List<dynamic>?)?.map((e) => e as String).toList(),
 );
 
 Map<String, dynamic> _$AuctionToJson(Auction instance) => <String, dynamic>{
@@ -40,4 +41,5 @@ Map<String, dynamic> _$AuctionToJson(Auction instance) => <String, dynamic>{
   'scope': instance.scope,
   'start_time': instance.startTime?.toIso8601String(),
   'end_time': instance.endTime?.toIso8601String(),
+  'images': instance.images,
 };

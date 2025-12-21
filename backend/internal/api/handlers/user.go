@@ -129,3 +129,14 @@ func (h *UserHandler) UpdateFCMToken(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
+
+// GetAllUsers returns all users for admin dashboard
+func (h *UserHandler) GetAllUsers(c *gin.Context) {
+	var users []models.User
+	// Preload TaskerProfile to show status
+	if err := h.db.Preload("TaskerProfile").Order("created_at desc").Find(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
+		return
+	}
+	c.JSON(http.StatusOK, users)
+}

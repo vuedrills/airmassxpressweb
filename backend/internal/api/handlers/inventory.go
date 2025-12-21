@@ -1,10 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+	"path/filepath"
+	"time"
 
 	"github.com/airmassxpress/backend/internal/config"
 	"github.com/airmassxpress/backend/internal/models"
+	"github.com/airmassxpress/backend/internal/services"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -12,12 +16,13 @@ import (
 )
 
 type InventoryHandler struct {
-	cfg *config.Config
-	db  *gorm.DB
+	cfg      *config.Config
+	db       *gorm.DB
+	supabase *services.SupabaseService
 }
 
-func NewInventoryHandler(cfg *config.Config, db *gorm.DB) *InventoryHandler {
-	return &InventoryHandler{cfg: cfg, db: db}
+func NewInventoryHandler(cfg *config.Config, db *gorm.DB, supabase *services.SupabaseService) *InventoryHandler {
+	return &InventoryHandler{cfg: cfg, db: db, supabase: supabase}
 }
 
 type CreateInventoryItemRequest struct {
@@ -139,4 +144,111 @@ func (h *InventoryHandler) DeleteInventoryItem(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Item deleted"})
+}
+
+// UpdateInventoryItem updates an existing item
+func (h *InventoryHandler) UpdateInventoryItem(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	itemID := c.Param("id")
+	var item models.InventoryItem
+	if err := h.db.Where("id = ? AND user_id = ?", itemID, userID).First(&item).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		return
+	}
+
+	var req CreateInventoryItemRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Update fields
+	item.Name = req.Name
+	item.Category = req.Category
+	item.Capacity = req.Capacity
+	item.Location = req.Location
+	item.IsAvailable = req.IsAvailable
+	item.WithOperator = req.WithOperator
+	item.OperatorBundled = req.OperatorBundled
+
+	if len(req.Photos) > 0 {
+		item.Photos = req.Photos
+	}
+
+	// V2 optional fields
+	if req.CapacityID != nil {
+		capID, err := uuid.Parse(*req.CapacityID)
+		if err == nil {
+			item.CapacityID = &capID
+		}
+	} else {
+		// If explicitly nil in update logic, arguably we might want to clear it,
+		// but request struct pointer just means present in JSON.
+		// Let's assume if sent as empty string we might want to clear?
+		// For now simplifying to only update if provided.
+	}
+
+	if req.HourlyRate != nil {
+		d := decimal.NewFromFloat(*req.HourlyRate)
+		item.HourlyRate = &d
+	}
+	if req.DailyRate != nil {
+		d := decimal.NewFromFloat(*req.DailyRate)
+		item.DailyRate = &d
+	}
+	if req.WeeklyRate != nil {
+		d := decimal.NewFromFloat(*req.WeeklyRate)
+		item.WeeklyRate = &d
+	}
+	if req.DeliveryFee != nil {
+		d := decimal.NewFromFloat(*req.DeliveryFee)
+		item.DeliveryFee = &d
+	}
+	if req.OperatorFee != nil {
+		d := decimal.NewFromFloat(*req.OperatorFee)
+		item.OperatorFee = &d
+	}
+	if req.Lat != nil {
+		item.Lat = req.Lat
+	}
+	if req.Lng != nil {
+		item.Lng = req.Lng
+	}
+
+	if err := h.db.Save(&item).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update item"})
+		return
+	}
+
+	c.JSON(http.StatusOK, item)
+}
+
+// UploadImage handles uploading an equipment photo to Supabase via Backend Proxy
+func (h *InventoryHandler) UploadImage(c *gin.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded"})
+		return
+	}
+
+	// Generate unique path: inventory/{timestamp}-{uniqueId}-{filename}
+	ext := filepath.Ext(file.Filename)
+	filename := fmt.Sprintf("%d-%s%s", time.Now().UnixNano(), uuid.New().String(), ext)
+	path := fmt.Sprintf("inventory/%s", filename)
+
+	// Upload using Supabase Service
+	publicURL, err := h.supabase.UploadFile(file, "uploads", path)
+	if err != nil {
+		// Log error internally
+		fmt.Printf("Supabase upload error: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file to storage"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"url": publicURL})
 }

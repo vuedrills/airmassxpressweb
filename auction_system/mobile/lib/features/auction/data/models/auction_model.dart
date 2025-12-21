@@ -30,7 +30,8 @@ class Auction {
   // The backend might need to surface images in the response.
   // For now, let's assume we might get a list of strings or null.
   // Update Backend if needed. For now, using placeholder logic in UI if null.
-  // final List<String>? images;
+  @JsonKey(name: 'images')
+  final List<String>? images;
 
   Auction({
     required this.id,
@@ -46,8 +47,43 @@ class Auction {
     required this.scope,
     this.startTime,
     this.endTime,
+    this.images,
   });
 
   factory Auction.fromJson(Map<String, dynamic> json) => _$AuctionFromJson(json);
   Map<String, dynamic> toJson() => _$AuctionToJson(this);
+
+  Auction copyWith({
+    int? id,
+    int? userId,
+    int? townId,
+    int? categoryId,
+    String? title,
+    String? description,
+    double? startPrice,
+    double? currentPrice,
+    int? bidCount,
+    String? status,
+    String? scope,
+    DateTime? startTime,
+    DateTime? endTime,
+    List<String>? images,
+  }) {
+    return Auction(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      townId: townId ?? this.townId,
+      categoryId: categoryId ?? this.categoryId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      startPrice: startPrice ?? this.startPrice,
+      currentPrice: currentPrice ?? this.currentPrice,
+      bidCount: bidCount ?? this.bidCount,
+      status: status ?? this.status,
+      scope: scope ?? this.scope,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      images: images ?? this.images,
+    );
+  }
 }

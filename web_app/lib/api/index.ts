@@ -99,8 +99,19 @@ export async function apiFetch<T = any>(endpoint: string, options: RequestInit =
     }
 
     if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Request failed' }));
-        throw new Error(error.error || `HTTP ${response.status}`);
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        try {
+            const errorJson = JSON.parse(errorText);
+            throw new Error(errorJson.error || `HTTP ${response.status}: ${errorText}`);
+        } catch (e: any) {
+            // If JSON parse fails, throw the text or custom error
+            if (e.message && !e.message.startsWith('HTTP')) {
+                // It was a JSON parse error, so use the raw text
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            throw e;
+        }
     }
 
     return response.json();
@@ -263,10 +274,20 @@ export async function approveTaskerProfile(email: string): Promise<void> {
 
 export async function fetchMyInventory(): Promise<import('@/types').InventoryItem[]> {
     const items = await apiFetch('/inventory');
-    // Map photos URLs
+    // Map backend snake_case to frontend camelCase
     return items.map((item: any) => ({
         ...item,
         isAvailable: item.is_available,
+        capacityId: item.capacity_id,
+        withOperator: item.with_operator,
+        operatorBundled: item.operator_bundled,
+        hourlyRate: item.hourly_rate ? parseFloat(item.hourly_rate) : undefined,
+        dailyRate: item.daily_rate ? parseFloat(item.daily_rate) : undefined,
+        weeklyRate: item.weekly_rate ? parseFloat(item.weekly_rate) : undefined,
+        deliveryFee: item.delivery_fee ? parseFloat(item.delivery_fee) : undefined,
+        operatorFee: item.operator_fee ? parseFloat(item.operator_fee) : undefined,
+        lat: item.lat,
+        lng: item.lng,
         photos: item.photos?.map((p: string) => p.startsWith('http') ? p : `${API_BASE_URL.replace('/api/v1', '')}${p}`) || []
     }));
 }
@@ -277,6 +298,7 @@ export async function createInventoryItem(item: Partial<import('@/types').Invent
         category: item.category,
         location: item.location,
         is_available: item.isAvailable,
+        photos: item.photos, // Include photos in create payload
     };
     // V2 fields - map camelCase to snake_case
     if (item.capacityId) payload.capacity_id = item.capacityId;
@@ -297,10 +319,62 @@ export async function createInventoryItem(item: Partial<import('@/types').Invent
     });
 }
 
+export async function updateInventoryItem(id: string, item: Partial<import('@/types').InventoryItem>): Promise<import('@/types').InventoryItem> {
+    const payload: Record<string, any> = {
+        name: item.name,
+        category: item.category,
+        location: item.location,
+        is_available: item.isAvailable,
+        photos: item.photos, // Send photos if updating
+    };
+    // V2 fields - map camelCase to snake_case
+    if (item.capacityId !== undefined) payload.capacity_id = item.capacityId;
+    if (item.capacity) payload.capacity = item.capacity;
+    if (item.withOperator !== undefined) payload.with_operator = item.withOperator;
+    if (item.operatorBundled !== undefined) payload.operator_bundled = item.operatorBundled;
+    if (item.hourlyRate !== undefined) payload.hourly_rate = item.hourlyRate;
+    if (item.dailyRate !== undefined) payload.daily_rate = item.dailyRate;
+    if (item.weeklyRate !== undefined) payload.weekly_rate = item.weeklyRate;
+    if (item.deliveryFee !== undefined) payload.delivery_fee = item.deliveryFee;
+    if (item.operatorFee !== undefined) payload.operator_fee = item.operatorFee;
+    if (item.lat !== undefined) payload.lat = item.lat;
+    if (item.lng !== undefined) payload.lng = item.lng;
+
+    return await apiFetch(`/inventory/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+    });
+}
+
 export async function deleteInventoryItem(id: string): Promise<void> {
     await apiFetch(`/inventory/${id}`, {
         method: 'DELETE',
     });
+}
+
+
+
+export async function uploadInventoryImage(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/inventory/upload`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${getToken()}`,
+        },
+        body: formData,
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Upload failed details:', response.status, errorText);
+        throw new Error(`Failed to upload image: ${response.status} ${errorText}`);
+    }
+
+    const data = await response.json();
+    // Return full URL if backend returns relative (though Supabase returns full)
+    return data.url.startsWith('http') ? data.url : `${API_BASE_URL.replace('/api/v1', '')}${data.url}`;
 }
 
 // ============ EQUIPMENT CAPACITIES API ============

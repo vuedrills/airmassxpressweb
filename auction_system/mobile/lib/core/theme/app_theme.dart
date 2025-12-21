@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Brand Colors - Dark/Premium Feel
-  static const Color primary = Color(0xFF1E1E1E); // Matte Black
-  static const Color accent = Color(0xFFE50914); // Pop of Red (Action)
-  static const Color background = Color(0xFFF9F9F9); // Light Grey
+  // Brand Colors - Strategic Success
+  static const Color primary = Color(0xFF003D33); // Deep Emerald
+  static const Color accent = Color(0xFFC4E86B); // Tech Lime
+  static const Color background = Color(0xFFFDFDFD); 
   static const Color surface = Colors.white;
-  static const Color textPrimary = Color(0xFF121212);
-  static const Color textSecondary = Color(0xFF757575);
+  static const Color textPrimary = Color(0xFF0D1F1A); // Very Dark Green/Black
+  static const Color textSecondary = Color(0xFF6B7280);
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -20,65 +20,53 @@ class AppTheme {
         secondary: accent,
         surface: surface,
         onSurface: textPrimary,
+        outline: const Color(0xFFE5E7EB),
       ),
       textTheme: TextTheme(
-        displayLarge: GoogleFonts.outfit(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
+        displayLarge: GoogleFonts.ebGaramond(
+          fontSize: 34,
+          fontWeight: FontWeight.w700,
           color: textPrimary,
-          letterSpacing: -1.0,
+          letterSpacing: -0.5,
         ),
-        displayMedium: GoogleFonts.outfit(
+        displayMedium: GoogleFonts.ebGaramond(
           fontSize: 28,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
           color: textPrimary,
         ),
-        titleLarge: GoogleFonts.outfit(
-          fontSize: 20,
+        titleLarge: GoogleFonts.ebGaramond(
+          fontSize: 22,
           fontWeight: FontWeight.w600,
           color: textPrimary,
         ),
         bodyLarge: GoogleFonts.inter(
           fontSize: 16,
           color: textPrimary,
+          height: 1.5,
         ),
         bodyMedium: GoogleFonts.inter(
           fontSize: 14,
           color: textSecondary,
-        ),
-        labelLarge: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
+          height: 1.5,
         ),
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: surface,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: true,
-        titleTextStyle: GoogleFonts.outfit(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+        centerTitle: false,
+        titleTextStyle: GoogleFonts.ebGaramond(
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
           color: textPrimary,
         ),
-        iconTheme: const IconThemeData(color: textPrimary),
+        iconTheme: const IconThemeData(color: textPrimary, size: 24),
       ),
-      /*
-      cardTheme: CardTheme(
-        color: surface,
-        elevation: 4,
-        shadowColor: Colors.black.withOpacity(0.05),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-      ),
-      */
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.grey[100],
+        fillColor: const Color(0xFFF3F4F6),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12), // Slightly more squared for corporate feel
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
@@ -89,22 +77,29 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: primary, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        hintStyle: GoogleFonts.inter(color: textSecondary, fontSize: 14),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primary,
-          foregroundColor: Colors.white,
-          minimumSize: const Size(double.infinity, 54),
+          backgroundColor: primary, // Emerald for main actions (Corporate/Trust)
+          foregroundColor: Colors.white, // White text on Emerald
+          // Note: Secondary buttons in UI can use the Lime accent manually
+          minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           textStyle: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
           ),
           elevation: 0,
         ),
+      ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: accent, // Lime FAB for high visibility actions
+        foregroundColor: primary, // Emerald icon on Lime
       ),
     );
   }

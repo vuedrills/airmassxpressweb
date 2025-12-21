@@ -15,6 +15,7 @@ type Config struct {
 	JWT      JWTConfig
 	AWS      AWSConfig
 	CORS     CORSConfig
+	Supabase SupabaseConfig
 }
 
 type ServerConfig struct {
@@ -88,11 +89,21 @@ func Load() (*Config, error) {
 			UseLocalStorage: getEnv("USE_LOCAL_STORAGE", "true") == "true",
 		},
 		CORS: CORSConfig{
-			AllowedOrigins: []string{"http://localhost:3000"},
+			AllowedOrigins: []string{"http://localhost:3000", "http://localhost:3001"},
+		},
+		Supabase: SupabaseConfig{
+			URL: getEnv("SUPABASE_URL", ""),
+			// Default to empty; user must provide SERVICE_ROLE_KEY for backend uploads
+			Key: getEnv("SUPABASE_SERVICE_ROLE_KEY", ""),
 		},
 	}
 
 	return config, nil
+}
+
+type SupabaseConfig struct {
+	URL string
+	Key string
 }
 
 func (c *Config) GetDSN() string {

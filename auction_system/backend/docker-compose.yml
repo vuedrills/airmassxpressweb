@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: airmass
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_DB: airmass_auction
+    ports:
+      - "5434:5432"
+    volumes:
+      - auction_postgres_data:/var/lib/postgresql/data
+volumes:
+  auction_postgres_data:

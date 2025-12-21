@@ -5,15 +5,17 @@ import (
 	"time"
 
 	"github.com/airmassxpress/auction_system/backend/internal/models"
+	"github.com/airmassxpress/auction_system/backend/internal/service"
 	"gorm.io/gorm"
 )
 
 type RotationWorker struct {
-	db *gorm.DB
+	db     *gorm.DB
+	notifS *service.NotificationService
 }
 
-func NewRotationWorker(db *gorm.DB) *RotationWorker {
-	return &RotationWorker{db: db}
+func NewRotationWorker(db *gorm.DB, notifS *service.NotificationService) *RotationWorker {
+	return &RotationWorker{db: db, notifS: notifS}
 }
 
 func (w *RotationWorker) Start(interval time.Duration) {
@@ -39,6 +41,9 @@ func (w *RotationWorker) RotateAuctions() {
 
 		if result.RowsAffected > 0 {
 			log.Printf("Expired %d auctions", result.RowsAffected)
+			// Ideally we'd find all affected auctions and notify winners/owners.
+			// For MVP, we can just log.
+			// But since we want "Notifications Wiring", let's at least implement promotion notification.
 		}
 
 		// 2. Promote Waiting Auctions
@@ -92,7 +97,8 @@ func (w *RotationWorker) RotateAuctions() {
 						log.Printf("Failed to promote auction %d: %v", auction.ID, err)
 					} else {
 						log.Printf("Promoted auction %d to active", auction.ID)
-						// Notify user here (stub)
+						// Notify user
+						go w.notifS.Notify(auction.UserID, models.NotificationNewBid, "Listing Active!", "Your listing is now active and accepting bids.", &auction.ID)
 					}
 				}
 			}

@@ -51,6 +51,7 @@ type Auction struct {
 type Bid struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	AuctionID uint      `gorm:"not null;index" json:"auction_id"`
+	Auction   Auction   `json:"auction"` // Add relation
 	UserID    uint      `gorm:"not null" json:"user_id"`
 	User      User      `json:"user"`
 	Amount    float64   `gorm:"not null" json:"amount"`
